@@ -16,10 +16,14 @@ namespace OpenTween
             if (index < 0)
                 index = 0;
 
-            index = EditorGUI.Popup(position, "Method", index, OpenAnimation.MethodList);
+            var methodRect = position;
+            methodRect.height = EditorGUI.GetPropertyHeight(method);
+            
+            index = EditorGUI.Popup(methodRect, "Method", index, OpenAnimation.MethodList);
             method.stringValue = OpenAnimation.MethodList[index];
 
             position.y += EditorGUI.GetPropertyHeight(method);
+            position.height = EditorGUI.GetPropertyHeight(target);
             
             Type targetType = OpenAnimation.GetTargetType(method.stringValue);
             if (targetType == null)
