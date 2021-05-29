@@ -1,0 +1,156 @@
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Reflection;
+using NUnit.Framework;
+using UnityEngine;
+using Object = UnityEngine.Object;
+
+namespace OpenTween.Tests.Helpers
+{
+    public abstract class HelperTestBase<TComponent> where TComponent : Component
+    {
+        protected delegate Tween<T> TweenCreator<T>(TComponent component);
+
+        protected readonly List<GameObject> Created = new List<GameObject>();
+        private const float Duration = 0.4f;
+
+        [OneTimeSetUp]
+        public void SetTweenValues()
+        {
+            TweenValues<Vector2>.Start = Vector2.left;
+            TweenValues<Vector2>.End = Vector2.right;
+
+            TweenValues<Vector3>.Start = Vector3.left;
+            TweenValues<Vector3>.End = Vector3.right;
+
+            TweenValues<Vector4>.Start = Vector4.zero;
+            ;
+            TweenValues<Vector4>.End = Vector4.one;
+
+            TweenValues<Quaternion>.Start = Quaternion.Euler(0, 90, 0);
+            TweenValues<Quaternion>.End = Quaternion.Euler(0, 180, 0);
+
+            TweenValues<Color>.Start = Color.white;
+            TweenValues<Color>.End = Color.black;
+
+            TweenValues<float>.Start = 0;
+            TweenValues<float>.End = 1;
+        }
+
+        [OneTimeSetUp]
+        public void SetAssertions()
+        {
+            Assertions<Vector2>.Method = AssertEqual;
+            Assertions<Vector3>.Method = AssertEqual;
+            Assertions<Vector4>.Method = AssertEqual;
+            Assertions<Quaternion>.Method = AssertEqual;
+            Assertions<float>.Method = AssertEqual;
+        }
+
+        [TearDown]
+        public void DestroyCreated()
+        {
+            foreach (GameObject obj in Created)
+            {
+                if (obj == null)
+                    continue;
+
+                if (Application.isPlaying)
+                    Object.Destroy(obj);
+                else
+                    Object.DestroyImmediate(obj);
+            }
+
+            Created.Clear();
+        }
+
+        protected IEnumerator Verify<T>(TweenCreator<T> creator, Expression<Func<TComponent, T>> property)
+        {
+            yield return RunTween(creator, property);
+            yield return RunTweenDestroyInMiddle(creator);
+            yield return RunTweenDynStart(creator, property);
+        } 
+        
+        protected virtual TComponent Create()
+        {
+            var obj = new GameObject("Test " + typeof(TComponent).Name, typeof(TComponent));
+            Created.Add(obj);
+            return obj.GetComponent<TComponent>();
+        }
+        
+        private IEnumerator RunTween<T>(TweenCreator<T> creator, Expression<Func<TComponent, T>> property)
+        {
+            TComponent comp = Create();
+            Tween<T> tween = creator(comp);
+            tween.Start = TweenValues<T>.Start;
+            tween.End = TweenValues<T>.End;
+            tween.Duration = Duration;
+            tween.Play();
+            yield return new WaitForSeconds(1.1f);
+            Assertions<T>.Method(TweenValues<T>.End, property.Compile()(comp), "RunTween: Invalid end value");
+        }
+
+        private IEnumerator RunTweenDestroyInMiddle<T>(TweenCreator<T> creator)
+        {
+            TComponent comp = Create();
+            Tween<T> tween = creator(comp);
+            tween.Start = TweenValues<T>.Start;
+            tween.End = TweenValues<T>.End;
+            tween.Duration = Duration;
+            tween.Play();
+            yield return new WaitForSeconds(tween.Duration / 2);
+            Object.Destroy(comp.gameObject);
+            yield return new WaitForSeconds(tween.Duration / 2);
+            Assert.IsFalse(tween.IsActive(), "RunTweenDestroyInMiddle: Tween is active");
+        }
+
+        private IEnumerator RunTweenDynStart<T>(TweenCreator<T> creator, Expression<Func<TComponent, T>> property)
+        {
+            TComponent comp = Create();
+
+            MemberInfo member = ((MemberExpression) property.Body).Member;
+            if (member is PropertyInfo p)
+                p.SetValue(comp, TweenValues<T>.Start);
+            else if (member is FieldInfo f)
+                f.SetValue(comp, TweenValues<T>.Start);
+
+            Tween<T> tween = creator(comp);
+            tween.DynamicStartEval = true;
+            tween.Start = default;
+            tween.End = TweenValues<T>.End;
+            tween.Duration = Duration;
+            tween.Play();
+
+            Assertions<T>.Method(TweenValues<T>.Start, tween.Start, "RunTweenDynStart: Start value is not evaluated.");
+            yield return new WaitForSeconds(Duration + 0.1f);
+            Assertions<T>.Method(TweenValues<T>.End, property.Compile()(comp), "RunTweenDynStart: Invalid end value.");
+        }
+
+        private static void AssertEqual(Vector4 a, Vector4 b, string message)
+        {
+            Assert.LessOrEqual((a - b).magnitude, 0.001f, message);
+        }
+
+        private static void AssertEqual(Vector3 a, Vector3 b, string message)
+        {
+            Assert.LessOrEqual((a - b).magnitude, 0.001f, message);
+        }
+
+        private static void AssertEqual(Vector2 a, Vector2 b, string message)
+        {
+            Assert.LessOrEqual((a - b).magnitude, 0.001f, message);
+        }
+
+        private static void AssertEqual(Quaternion a, Quaternion b, string message)
+        {
+            Assert.True(a == b, message);
+        }
+
+        private static void AssertEqual(float a, float b, string message)
+        {
+            Assert.LessOrEqual((a - b), 0.001f, message);
+        }
+    }
+}

@@ -1,0 +1,17 @@
+﻿{
+  "name": "OpenTween.Editor",
+  "references": [
+    "OpenTween",
+    "UniTask"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.cysharp.unitask",
+      "expression": "",
+      "define": "UNITASK"
+    }
+  ]
+}

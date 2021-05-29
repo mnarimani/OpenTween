@@ -1,0 +1,14 @@
+﻿{
+  "name": "OpenTween",
+  "allowUnsafeCode": true,
+  "references": [
+    "UniTask"
+  ],
+  "versionDefines": [
+    {
+      "name": "com.cysharp.unitask",
+      "expression": "",
+      "define": "UNITASK"
+    }
+  ]
+}
