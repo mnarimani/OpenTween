@@ -4,6 +4,6 @@ namespace OpenTween.Tests.Helpers
 {
     public static class Assertions<T>
     {
-        public static Action<T, T, string> Method;
+        public static Action<T, T, string> AreEqual;
     }
 }

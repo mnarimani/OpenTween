@@ -35,5 +35,38 @@ namespace OpenTween
             
             return tween;
         }
+        
+        public static Tween<float> DOAlpha(this Image t)
+        {
+            var tween = Tween.Create<float>();
+            tween.ValueUpdated += ValueChanged;
+            tween.StartEvalFunc = StartEval;
+            tween.BindToComponent(t);
+            return tween;
+
+            void ValueChanged(float v)
+            {
+                Color c = t.color;
+                c.a = v;
+                t.color = c;
+            }
+
+            float StartEval()
+            {
+                return t.color.a;
+            }
+        }
+        
+        public static Tween<float> DOAlpha(this Image t, float end, float duration, Ease ease = EaseMap.Default)
+        {
+            Tween<float> tween = t.DOAlpha();
+            
+            tween.End = end;
+            tween.Duration = duration;
+            tween.Ease = ease;
+            tween.DynamicStartEval = true;
+            
+            return tween;
+        }
     }
 }

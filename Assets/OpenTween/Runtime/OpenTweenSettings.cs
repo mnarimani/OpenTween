@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using UnityEngine;
 
 namespace OpenTween
@@ -28,7 +29,7 @@ namespace OpenTween
 
                     _file = ScriptableObject.CreateInstance<OpenTweenSettingsFile>();
 #if UNITY_EDITOR
-                    if (!UnityEditor.AssetDatabase.IsValidFolder("Resources"))
+                    if (!Directory.Exists(Application.dataPath + "/Resources"))
                         UnityEditor.AssetDatabase.CreateFolder("Assets", "Resources");
                     UnityEditor.AssetDatabase.CreateAsset(_file, "Assets/Resources/OpenTweenSettings.asset");
                     UnityEditor.AssetDatabase.SaveAssets();

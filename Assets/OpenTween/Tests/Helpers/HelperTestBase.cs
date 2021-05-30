@@ -42,11 +42,11 @@ namespace OpenTween.Tests.Helpers
         [OneTimeSetUp]
         public void SetAssertions()
         {
-            Assertions<Vector2>.Method = AssertEqual;
-            Assertions<Vector3>.Method = AssertEqual;
-            Assertions<Vector4>.Method = AssertEqual;
-            Assertions<Quaternion>.Method = AssertEqual;
-            Assertions<float>.Method = AssertEqual;
+            Assertions<Vector2>.AreEqual = AssertEqual;
+            Assertions<Vector3>.AreEqual = AssertEqual;
+            Assertions<Vector4>.AreEqual = AssertEqual;
+            Assertions<Quaternion>.AreEqual = AssertEqual;
+            Assertions<float>.AreEqual = AssertEqual;
         }
 
         [TearDown]
@@ -68,9 +68,12 @@ namespace OpenTween.Tests.Helpers
 
         protected IEnumerator Verify<T>(TweenCreator<T> creator, Expression<Func<TComponent, T>> property)
         {
-            yield return RunTween(creator, property);
+            Func<TComponent, T> getter = property.Compile();
+            Action<TComponent, T> setter = ExpressionHelper.CreateSetter(property);
+            
+            yield return RunTween(creator, getter);
             yield return RunTweenDestroyInMiddle(creator);
-            yield return RunTweenDynStart(creator, property);
+            yield return RunTweenDynStart(creator, getter, setter);
         } 
         
         protected virtual TComponent Create()
@@ -80,7 +83,7 @@ namespace OpenTween.Tests.Helpers
             return obj.GetComponent<TComponent>();
         }
         
-        private IEnumerator RunTween<T>(TweenCreator<T> creator, Expression<Func<TComponent, T>> property)
+        private IEnumerator RunTween<T>(TweenCreator<T> creator, Func<TComponent, T> getter)
         {
             TComponent comp = Create();
             Tween<T> tween = creator(comp);
@@ -89,7 +92,7 @@ namespace OpenTween.Tests.Helpers
             tween.Duration = Duration;
             tween.Play();
             yield return new WaitForSeconds(1.1f);
-            Assertions<T>.Method(TweenValues<T>.End, property.Compile()(comp), "RunTween: Invalid end value");
+            Assertions<T>.AreEqual(TweenValues<T>.End, getter(comp), "RunTween: Invalid end value");
         }
 
         private IEnumerator RunTweenDestroyInMiddle<T>(TweenCreator<T> creator)
@@ -106,16 +109,10 @@ namespace OpenTween.Tests.Helpers
             Assert.IsFalse(tween.IsActive(), "RunTweenDestroyInMiddle: Tween is active");
         }
 
-        private IEnumerator RunTweenDynStart<T>(TweenCreator<T> creator, Expression<Func<TComponent, T>> property)
+        private IEnumerator RunTweenDynStart<T>(TweenCreator<T> creator, Func<TComponent, T> getter, Action<TComponent, T> setter)
         {
             TComponent comp = Create();
-
-            MemberInfo member = ((MemberExpression) property.Body).Member;
-            if (member is PropertyInfo p)
-                p.SetValue(comp, TweenValues<T>.Start);
-            else if (member is FieldInfo f)
-                f.SetValue(comp, TweenValues<T>.Start);
-
+            setter(comp, TweenValues<T>.Start);
             Tween<T> tween = creator(comp);
             tween.DynamicStartEval = true;
             tween.Start = default;
@@ -123,10 +120,12 @@ namespace OpenTween.Tests.Helpers
             tween.Duration = Duration;
             tween.Play();
 
-            Assertions<T>.Method(TweenValues<T>.Start, tween.Start, "RunTweenDynStart: Start value is not evaluated.");
+            Assertions<T>.AreEqual(TweenValues<T>.Start, tween.Start, "RunTweenDynStart: Start value is not evaluated.");
             yield return new WaitForSeconds(Duration + 0.1f);
-            Assertions<T>.Method(TweenValues<T>.End, property.Compile()(comp), "RunTweenDynStart: Invalid end value.");
+            Assertions<T>.AreEqual(TweenValues<T>.End, getter(comp), "RunTweenDynStart: Invalid end value.");
         }
+
+
 
         private static void AssertEqual(Vector4 a, Vector4 b, string message)
         {
