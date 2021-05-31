@@ -1,6 +1,6 @@
 namespace OpenTween
 {
-    public enum Ease
+    public enum Ease : byte
     {
         Unset, // Used to let TweenParams know that the ease was not set and apply it differently if used on Tweeners or Sequences
         Linear,
@@ -22,9 +22,6 @@ namespace OpenTween
         InExpo,
         OutExpo,
         InOutExpo,
-        InCirc,
-        OutCirc,
-        InOutCirc,
         InElastic,
         OutElastic,
         InOutElastic,
@@ -34,7 +31,5 @@ namespace OpenTween
         InBounce,
         OutBounce,
         InOutBounce,
-        // Extra custom eases
-        Flash, InFlash, OutFlash, InOutFlash,
     }
 }

@@ -2,12 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace OpenTween.Tests.Helpers
+namespace OpenTween.Helpers
 {
     public abstract class HelperTestBase<TComponent> where TComponent : Component
     {
@@ -103,9 +102,10 @@ namespace OpenTween.Tests.Helpers
             tween.End = TweenValues<T>.End;
             tween.Duration = Duration;
             tween.Play();
-            yield return new WaitForSeconds(tween.Duration / 2);
+            float halfDuration = tween.Duration / 2;
+            yield return new WaitForSeconds(halfDuration);
             Object.Destroy(comp.gameObject);
-            yield return new WaitForSeconds(tween.Duration / 2);
+            yield return new WaitForSeconds(halfDuration);
             Assert.IsFalse(tween.IsActive(), "RunTweenDestroyInMiddle: Tween is active");
         }
 

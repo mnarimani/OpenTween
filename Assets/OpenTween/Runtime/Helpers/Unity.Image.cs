@@ -24,7 +24,7 @@ namespace OpenTween
             }
         }
         
-        public static Tween<Color> DOColor(this Image t, Color end, float duration, Ease ease = EaseMap.Default)
+        public static Tween<Color> DOColor(this Image t, Color end, float duration, Ease ease = Ease.OutQuad)
         {
             Tween<Color> tween = t.DOColor();
             
@@ -57,7 +57,7 @@ namespace OpenTween
             }
         }
         
-        public static Tween<float> DOAlpha(this Image t, float end, float duration, Ease ease = EaseMap.Default)
+        public static Tween<float> DOAlpha(this Image t, float end, float duration, Ease ease = Ease.OutQuad)
         {
             Tween<float> tween = t.DOAlpha();
             

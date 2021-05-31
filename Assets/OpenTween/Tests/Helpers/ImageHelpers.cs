@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-namespace OpenTween.Tests.Helpers
+namespace OpenTween.Helpers
 {
     [TestFixture]
     public class ImageHelpers : HelperTestBase<Image>

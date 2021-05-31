@@ -1,7 +1,8 @@
-using System;
 using System.Diagnostics;
+using System.Globalization;
 using DG.Tweening;
 using OpenTween;
+using OpenTween.Jobs;
 using UnityEngine;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
@@ -10,8 +11,11 @@ using Tween = OpenTween.Tween;
 
 public class TestTween : MonoBehaviour
 {
-    /*[SerializeField] private Text _startup, _fps;
+    [SerializeField] private Text _startup, _fps;
 
+    public int LoopCount = 64000;
+    public float TweenDuration = 1;
+    
     private Transform[] _testTransforms;
     private bool _track;
     private float _timer;
@@ -19,7 +23,7 @@ public class TestTween : MonoBehaviour
 
     private void Awake()
     {
-        _testTransforms = new Transform[64000];
+        _testTransforms = new Transform[LoopCount];
         for (var i = 0; i < _testTransforms.Length; i++)
         {
             _testTransforms[i] = new GameObject("Test").transform;
@@ -41,14 +45,28 @@ public class TestTween : MonoBehaviour
         Debug.Log(stopwatch.ElapsedMilliseconds);
     }
 
+    public void RunJobTween()
+    {
+        _timer = 0;
+        _count = 0;
+        _track = true;
+
+        Stopwatch stopwatch = OTJobFloat();
+        // Stopwatch stopwatch = JobTransforms();
+
+        if (_startup != null) _startup.text = stopwatch.ElapsedMilliseconds.ToString();
+
+        Debug.Log(stopwatch.ElapsedMilliseconds);
+    }
+
     public void RunDOTween()
     {
         _timer = 0;
         _count = 0;
         _track = true;
 
-        // Stopwatch stopwatch = DOTweenGenericFloat();
-        Stopwatch stopwatch = DOTransforms();
+        Stopwatch stopwatch = DOTweenGenericFloat();
+        // Stopwatch stopwatch = DOTransforms();
 
         if (_startup != null) _startup.text = stopwatch.ElapsedMilliseconds.ToString();
 
@@ -62,42 +80,55 @@ public class TestTween : MonoBehaviour
 
         _timer += Time.deltaTime;
         _count++;
-        if (_timer >= 10)
+        if (_timer >= TweenDuration / 4)
         {
             if (_fps != null)
-                _fps.text = (_count / 10f).ToString();
+                _fps.text = (_count / (TweenDuration / 4)).ToString(CultureInfo.InvariantCulture);
             _timer = 0;
             _count = 0;
         }
     }
 
-    private static Stopwatch OTGenericFloat()
+    private Stopwatch OTGenericFloat()
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        for (int i = 0; i < 64000; i++)
+        for (int i = 0; i < LoopCount; i++)
         {
-            var tween = Tween.Create<float>();
+            /*var tween = Tween.Create<float>();
             tween.Start = 0;
             tween.End = 10;
             tween.Duration = 60;
             tween.Ease = Ease.OutQuad;
             // tween.ValueUpdated += v => { };
-            tween.Play();
+            tween.Play();*/
         }
 
         stopwatch.Stop();
         return stopwatch;
     }
 
-    private static Stopwatch DOTweenGenericFloat()
+    private Stopwatch OTJobFloat()
     {
         var stopwatch = new Stopwatch();
         stopwatch.Start();
-        for (int i = 0; i < 64000; i++)
+        for (int i = 0; i < LoopCount; i++)
+        {
+            Tween.Create<float>().SetStart(0).SetEnd(10).SetDuration(TweenDuration).Play();
+        }
+
+        stopwatch.Stop();
+        return stopwatch;
+    }
+
+    private Stopwatch DOTweenGenericFloat()
+    {
+        var stopwatch = new Stopwatch();
+        stopwatch.Start();
+        for (int i = 0; i < LoopCount; i++)
         {
             float value = 0;
-            DOTween.To(() => value, v => value = v, 10, 60)
+            DOTween.To(() => value, v => value = v, 10, TweenDuration)
                 .SetEase(DG.Tweening.Ease.OutQuad);
         }
 
@@ -135,5 +166,5 @@ public class TestTween : MonoBehaviour
 
         stopwatch.Stop();
         return stopwatch;
-    }*/
+    }
 }

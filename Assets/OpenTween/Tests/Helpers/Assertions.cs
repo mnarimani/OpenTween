@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace OpenTween.Tests.Helpers
+namespace OpenTween.Helpers
 {
     public static class Assertions<T>
     {

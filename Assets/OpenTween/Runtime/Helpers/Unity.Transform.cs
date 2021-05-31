@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using OpenTween.Jobs;
+using UnityEngine;
 
 namespace OpenTween
 {
@@ -6,7 +7,8 @@ namespace OpenTween
     {
         public static Tween<Vector3> DOMove(this Transform t)
         {
-            var tween = Tween.Create<Vector3>();
+            Tween<Vector3> tween = Tween.Create(TweenOptions<Vector3>.Default);
+
             tween.ValueUpdated += ValueChanged;
             tween.StartEvalFunc = StartEval;
             tween.BindToComponent(t);
@@ -22,20 +24,22 @@ namespace OpenTween
                 return t.position;
             }
         }
-        public static Tween<Vector3> DOMove(this Transform t, Vector3 end, float duration, Ease ease = EaseMap.Default)
+
+        public static Tween<Vector3> DOMove(this Transform t, Vector3 end, float duration, Ease ease = Ease.OutQuad)
         {
             Tween<Vector3> tween = t.DOMove();
-            
+
             tween.End = end;
             tween.Duration = duration;
             tween.Ease = ease;
             tween.DynamicStartEval = true;
-            
+
             return tween;
         }
+
         public static Tween<Vector3> DOLocalMove(this Transform t)
         {
-            var tween = Tween.Create<Vector3>();
+            var tween = Tween.Create<Vector3>(default);
             tween.ValueUpdated += ValueChanged;
             tween.StartEvalFunc = StartEval;
             tween.BindToComponent(t);
@@ -51,16 +55,16 @@ namespace OpenTween
                 return t.localPosition;
             }
         }
-        
-        public static Tween<Vector3> DOLocalMove(this Transform t, Vector3 end, float duration, Ease ease = EaseMap.Default)
+
+        public static Tween<Vector3> DOLocalMove(this Transform t, Vector3 end, float duration, Ease ease = Ease.OutQuad)
         {
             Tween<Vector3> tween = t.DOLocalMove();
-            
+
             tween.End = end;
             tween.Duration = duration;
             tween.Ease = ease;
             tween.DynamicStartEval = true;
-            
+
             return tween;
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace OpenTween.Tests.Helpers
+﻿namespace OpenTween.Helpers
 {
     public static class TweenValues<T>
     {

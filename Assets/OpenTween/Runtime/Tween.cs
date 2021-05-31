@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using OpenTween.Jobs;
 using UnityEngine;
 #if UNITASK
 using Task = Cysharp.Threading.Tasks.UniTask;
@@ -14,443 +15,137 @@ using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<bool>;
 
 namespace OpenTween
 {
-    public interface ITween
+    public readonly partial struct Tween<T> : IDisposable, ITween
     {
-        event Action PlayStarted;
-        event Action Paused;
-        event Action Completed;
-        event Action RewindStarted;
-        event Action RewindPaused;
-        event Action RewindCompleted;
-        event Action Disposing;
-        bool Play(bool restart = false);
-        void Rewind(bool restart = false);
-        void ForceComplete();
-        void Pause();
-        Task AwaitPlayStart();
-        Task AwaitPause();
-        Task AwaitCompletion();
-        Task AwaitRewindStart();
-        Task AwaitRewindCompletion();
-        Task AwaitDispose();
-        bool IsActive();
-    }
-
-    public struct Tween
-    {
-        public static Tween<T> Create<T>()
-        {
-            return new Tween<T>(TweenPool<TweenInternal<T>>.GetNew());
-        }
-    }
-
-    public readonly struct Tween<T> : IDisposable, ITween
-    {
+        private readonly int _index;
         private readonly int _version;
 
-        internal Tween(TweenInternal<T> core)
+        internal Tween(int index, int version)
         {
-            Core = core;
-            _version = Core.Version;
+            _version = version;
+            _index = index;
         }
 
-        internal TweenInternal<T> Core { get; }
-
-        public T Start
+        private ref TweenOptions<T> Options
         {
             get
             {
-                AssertActive();
-                return Core.Options.Start;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.Start = value;
+                ref TweenOptions<T> opt = ref TweenRegistry<T, TweenManagedReferences<T>>.GetOptionsByRef(_index);
+                AssertActive(opt.Version);
+                return ref opt;
             }
         }
 
-        public T End
+        private TweenManagedReferences<T> Refs
         {
             get
             {
-                AssertActive();
-                return Core.Options.End;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.End = value;
+                TweenManagedReferences<T> refs = TweenRegistry<T, TweenManagedReferences<T>>.GetManagedReferences(_index);
+                AssertActive(refs.Version);
+                return refs;
             }
         }
 
-        public Ease Ease
+        private ref TweenInternal<T> InternalTween
         {
             get
             {
-                AssertActive();
-                return Core.Options.Ease;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.Ease = value;
+                ref TweenInternal<T> t = ref TweenRegistry<T, TweenManagedReferences<T>>.GetByRef(_index);
+                AssertActive(t.Version);
+                return ref t;
             }
         }
 
-        public EaseFunc CustomEase
+        public Tween<T> CopyOptionsFrom(TweenOptions<T> other)
         {
-            get
-            {
-                AssertActive();
-                return Core.Options.CustomEase;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.CustomEase = value;
-            }
+            Options.CopyFrom(other);
+            return this;
+        }
+        
+        public Tween<T> CopyOptionsFrom(ref TweenOptions<T> other)
+        {
+            Options.CopyFrom(ref other);
+            return this;
         }
 
-        public float OvershootOrAmplitude
+        public Tween<T> Play(bool restart = false)
         {
-            get
-            {
-                AssertActive();
-                return Core.Options.OvershootOrAmplitude;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.OvershootOrAmplitude = value;
-            }
+            TweenLogic.PlayTween<T>(_index, restart);
+            return this;
         }
 
-        public float Period
+        public Tween<T> Rewind(bool restart = false)
         {
-            get
-            {
-                AssertActive();
-                return Core.Options.Period;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.Period = value;
-            }
+            TweenLogic.Rewind<T, TweenManagedReferences<T>>(_index, restart);
+            return this;
         }
 
-        public Func<T> StartEvalFunc
+        public Tween<T> ForceComplete()
         {
-            get
-            {
-                AssertActive();
-                return Core.Options.StartEvalFunc;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.StartEvalFunc = value;
-            }
+            TweenLogic.ForceComplete<T, TweenManagedReferences<T>>(_index);
+            return this;
         }
 
-        public bool DynamicStartEval
+        public Tween<T> Pause()
         {
-            get
-            {
-                AssertActive();
-                return Core.Options.DynamicStartEval;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.DynamicStartEval = value;
-            }
-        }
-
-        public bool IsLocal
-        {
-            get
-            {
-                AssertActive();
-                return Core.Options.IsLocal;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.IsLocal = value;
-            }
-        }
-
-        public bool IsRelative
-        {
-            get
-            {
-                AssertActive();
-                return Core.Options.IsRelative;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.IsRelative = value;
-            }
-        }
-
-        public float Duration
-        {
-            get
-            {
-                AssertActive();
-                return Core.Options.Duration;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.Duration = value;
-            }
-        }
-
-        public bool DisposeOnComplete
-        {
-            get
-            {
-                AssertActive();
-                return Core.Options.DisposeOnComplete;
-            }
-            set
-            {
-                AssertActive();
-                Core.Options.DisposeOnComplete = value;
-            }
-        }
-
-        public T CurrentValue
-        {
-            get
-            {
-                AssertActive();
-                return Core.CurrentValue;
-            }
-        }
-
-        public float CurrentTime
-        {
-            get
-            {
-                AssertActive();
-                return Core.CurrentTime;
-            }
-        }
-
-        public TweenState State
-        {
-            get
-            {
-                AssertActive();
-                return Core.State;
-            }
-        }
-
-        public event Action<T> ValueUpdated
-        {
-            add
-            {
-                AssertActive();
-                Core.ValueUpdated += value;
-            }
-            remove
-            {
-                AssertActive();
-                Core.ValueUpdated -= value;
-            }
-        }
-
-        public event Action PlayStarted
-        {
-            add
-            {
-                AssertActive();
-                Core.PlayStarted += value;
-            }
-            remove
-            {
-                AssertActive();
-                Core.PlayStarted -= value;
-            }
-        }
-
-        public event Action Paused
-        {
-            add
-            {
-                AssertActive();
-                Core.Paused += value;
-            }
-            remove
-            {
-                AssertActive();
-                Core.Paused -= value;
-            }
-        }
-
-        public event Action Completed
-        {
-            add
-            {
-                AssertActive();
-                Core.Completed += value;
-            }
-            remove
-            {
-                AssertActive();
-                Core.Completed -= value;
-            }
-        }
-
-        public event Action RewindStarted
-        {
-            add
-            {
-                AssertActive();
-                Core.RewindStarted += value;
-            }
-            remove
-            {
-                AssertActive();
-                Core.RewindStarted -= value;
-            }
-        }
-
-        public event Action RewindPaused
-        {
-            add
-            {
-                AssertActive();
-                Core.RewindPaused += value;
-            }
-            remove
-            {
-                AssertActive();
-                Core.RewindPaused -= value;
-            }
-        }
-
-        public event Action RewindCompleted
-        {
-            add
-            {
-                AssertActive();
-                Core.RewindCompleted += value;
-            }
-            remove
-            {
-                AssertActive();
-                Core.RewindCompleted -= value;
-            }
-        }
-
-        public event Action Disposing
-        {
-            add
-            {
-                AssertActive();
-                Core.Disposing += value;
-            }
-            remove
-            {
-                AssertActive();
-                Core.Disposing -= value;
-            }
-        }
-
-        public void CopyOptionsFrom(TweenOptions<T> other)
-        {
-            AssertActive();
-            Core.CopyOptionsFrom(other);
-        }
-
-        public bool Play(bool restart = false)
-        {
-            AssertActive();
-            return Core.Play(restart);
-        }
-
-        public void Rewind(bool restart = false)
-        {
-            AssertActive();
-            Core.Rewind(restart);
-        }
-
-        public void ForceComplete()
-        {
-            AssertActive();
-            Core.ForceComplete();
-        }
-
-        public void Pause()
-        {
-            AssertActive();
-            Core.Pause();
+            TweenLogic.Pause<T, TweenManagedReferences<T>>(_index);
+            return this;
         }
 
         public Task AwaitPlayStart()
         {
-            AssertActive();
-            return Core.AwaitPlayStart();
+            return TweenLogic.AwaitPlayStart<T, TweenManagedReferences<T>>(_index);
         }
 
         public Task AwaitPause()
         {
-            AssertActive();
-            return Core.AwaitPause();
+            return TweenLogic.AwaitPause<T, TweenManagedReferences<T>>(_index);
         }
 
         public Task AwaitCompletion()
         {
-            AssertActive();
-            return Core.AwaitCompletion();
+            return TweenLogic.AwaitCompletion<T, TweenManagedReferences<T>>(_index);
         }
 
         public Task AwaitRewindStart()
         {
-            AssertActive();
-            return Core.AwaitRewindStart();
+            return TweenLogic.AwaitRewindStart<T, TweenManagedReferences<T>>(_index);
         }
 
         public Task AwaitRewindCompletion()
         {
-            AssertActive();
-            return Core.AwaitRewindCompletion();
+            return TweenLogic.AwaitRewindCompletion<T, TweenManagedReferences<T>>(_index);
         }
 
         public Task AwaitDispose()
         {
-            AssertActive();
-            return Core.AwaitDispose();
+            return TweenLogic.AwaitDispose<T, TweenManagedReferences<T>>(_index);
         }
 
-        public void BindToComponent(Component c)
+        public Tween<T> BindToComponent(Component c)
         {
-            AssertActive();
-            Core.BindToComponent(c);
+            Refs.BoundComponent = (c);
+            Refs.HasBoundComponent = true;
+            return this;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal void AssertActive()
+        private void AssertActive(int coreVersion)
         {
-            if (Core.Version != _version) throw new InvalidOperationException("Tween has been recycled.");
+            if (coreVersion != _version) throw new InvalidOperationException("Tween has been recycled.");
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsActive()
         {
-            return Core.Version == _version;
+            ref TweenInternal<T> t = ref TweenRegistry<T, TweenManagedReferences<T>>.GetByRef(_index);
+            return t.Version == _version;
         }
 
         public void Dispose()
         {
             if (!IsActive()) return;
-            Core.Dispose();
+            TweenRegistry<T, TweenManagedReferences<T>>.Return(_index);
         }
     }
 }

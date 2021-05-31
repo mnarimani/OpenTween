@@ -3,7 +3,7 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 
-namespace OpenTween.Tests.Helpers
+namespace OpenTween.Helpers
 {
     [TestFixture]
     public class TransformHelpers : HelperTestBase<Transform>

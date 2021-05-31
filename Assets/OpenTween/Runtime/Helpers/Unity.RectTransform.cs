@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using OpenTween.Jobs;
+using UnityEngine;
 
 namespace OpenTween
 {
@@ -22,7 +23,7 @@ namespace OpenTween
             }
         }
         
-        public static Tween<Vector2> DOAnchorPos(this RectTransform t, Vector2 end, float duration, Ease ease = EaseMap.Default)
+        public static Tween<Vector2> DOAnchorPos(this RectTransform t, Vector2 end, float duration, Ease ease = Ease.OutQuad)
         {
             Tween<Vector2> tween = t.DOAnchorPos();
             

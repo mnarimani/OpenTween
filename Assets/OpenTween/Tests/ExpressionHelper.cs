@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace OpenTween.Tests
+namespace OpenTween
 {
     public class ExpressionHelper
     {

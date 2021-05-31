@@ -1,14 +1,30 @@
-﻿{
-  "name": "OpenTween",
-  "allowUnsafeCode": true,
-  "references": [
-    "UniTask"
-  ],
-  "versionDefines": [
-    {
-      "name": "com.cysharp.unitask",
-      "expression": "",
-      "define": "UNITASK"
-    }
-  ]
+{
+    "name": "OpenTween",
+    "rootNamespace": "",
+    "references": [
+        "UniTask",
+        "Unity.Burst",
+        "Unity.Mathematics",
+        "Unity.Collections"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": true,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.cysharp.unitask",
+            "expression": "",
+            "define": "UNITASK"
+        },
+        {
+            "name": "com.unity.collections",
+            "expression": "",
+            "define": "UNITY_COLLECTIONS"
+        }
+    ],
+    "noEngineReferences": false
 }

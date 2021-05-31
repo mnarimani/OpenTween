@@ -1,3 +1,5 @@
+using OpenTween.Jobs;
+
 namespace OpenTween
 {
     [System.Serializable]
@@ -16,7 +18,7 @@ namespace OpenTween
 
         private void Reset()
         {
-            Options.ResetToDefault();
+            Options.ResetToDefaults();
         }
     }
 
@@ -36,7 +38,7 @@ namespace OpenTween
 
         private void Reset()
         {
-            Options.ResetToDefault();
+            Options.ResetToDefaults();
         }
     }
 
@@ -56,7 +58,7 @@ namespace OpenTween
 
         private void Reset()
         {
-            Options.ResetToDefault();
+            Options.ResetToDefaults();
         }
     }
 
