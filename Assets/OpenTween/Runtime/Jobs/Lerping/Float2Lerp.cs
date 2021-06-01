@@ -32,7 +32,8 @@ namespace OpenTween.Jobs
             
             TweenOptions<float2> options = Options[index];
 
-            t.CurrentValue = math.lerp(options.Start, options.End, t.LerpParameter);
+            var end = options.IsRelative ? options.Start + options.End : options.End;
+            t.CurrentValue = math.lerp(options.Start, end, t.LerpParameter);
             Array[index] = t;
         }
     }

@@ -37,7 +37,14 @@ namespace OpenTween.Jobs
         protected JobHandle JobHandle;
 
         private static TInherited _instance;
-        public static TInherited Instance => (_instance ??= new TInherited());
+        public static TInherited Instance
+        {
+            get
+            {
+                _instance ??= new TInherited();
+                return _instance;
+            }
+        }
 
         protected bool IsInitialized => All.IsCreated;
 
@@ -142,7 +149,7 @@ namespace OpenTween.Jobs
             return References[index];
         }
 
-        public virtual void Schedule(float dt)
+        protected virtual void Schedule(float dt)
         {
             if (!IsInitialized)
                 return;
@@ -150,6 +157,8 @@ namespace OpenTween.Jobs
             for (int i = ActiveIndices.Length - 1; i >= 0; i--)
             {
                 int index = ActiveIndices[i];
+                ref TTween tween = ref All.GetRef(index);
+                ref TOptions options = ref AllOptions.GetRef(index);
                 TReferences refs = References[index];
 
                 if (refs.HasBoundComponent && refs.BoundComponent == null)
@@ -158,9 +167,16 @@ namespace OpenTween.Jobs
 
                     ActiveIndices.RemoveAtSwapBack(i);
                     FreeIndices.Push(index);
+                    
                     refs.Version++;
                     GetByRef(index).Version++;
                     GetOptionsByRef(index).Version++;
+                    continue;
+                }
+                
+                if (options.AutoPlay && tween.State == TweenState.NotPlayed)
+                {
+                    tween.State = TweenState.Running;
                 }
             }
         }
@@ -202,12 +218,10 @@ namespace OpenTween.Jobs
                 }
 
                 tween.IsCompletedInLastFrame = false;
-                // tween.ValueChangedInLastFrame = false;
+                tween.IsUpdatedInLastFrame = false;
                 tween.IsRewindCompletedInLastFrame = false;
             }
         }
-
-        protected abstract void ProcessUpdate(float dt);
 
         protected abstract void ProcessPostComplete(int index, ref TTween tween, ref TOptions options, TReferences refs);
 

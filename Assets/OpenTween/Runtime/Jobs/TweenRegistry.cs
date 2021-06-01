@@ -4,6 +4,7 @@ using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine;
 #if UNITY_COLLECTIONS
 using NativeListInt = Unity.Collections.NativeList<int>;
 
@@ -19,23 +20,19 @@ namespace OpenTween.Jobs
     {
         public static LerpScheduleFunc<T> LerpScheduler;
 
-        public override void Schedule(float dt)
+        protected override void Schedule(float dt)
         {
             if (!IsInitialized)
                 return;
             base.Schedule(dt);
-            JobHandle = LerpScheduler(All, AllOptions, ActiveIndices, JobHandle);
-        }
-
-        protected override void ProcessUpdate(float dt)
-        {
             JobHandle = new Job
             {
-                DT = dt,
+                DelaTime = dt,
                 Tweens = All,
                 Options = AllOptions,
                 Indices = ActiveIndices
             }.Schedule(ActiveIndices.Length, 64);
+            JobHandle = LerpScheduler(All, AllOptions, ActiveIndices, JobHandle);
         }
 
         protected override void ProcessPostComplete(int index, ref TweenInternal<T> tween, ref TweenOptions<T> options, TweenManagedReferences<T> refs)
@@ -45,7 +42,7 @@ namespace OpenTween.Jobs
                 refs.OnValueUpdated(tween.CurrentValue);
             }
         }
-        
+
         public override bool Play(int index, bool restart)
         {
             TweenManagedReferences<T> refs = GetManagedReferences(index);
@@ -66,11 +63,11 @@ namespace OpenTween.Jobs
 
             return base.Play(index, restart);
         }
-        
+
         [BurstCompile]
         private struct Job : IJobParallelFor
         {
-            public float DT;
+            public float DelaTime;
 
             [ReadOnly, NativeDisableParallelForRestriction]
             public NativeListInt Indices;
@@ -79,7 +76,7 @@ namespace OpenTween.Jobs
             public NativeArray<TweenOptions<T>> Options;
 
             [NativeDisableParallelForRestriction] public NativeArray<TweenInternal<T>> Tweens;
-
+            
             [BurstCompile]
             public void Execute(int i)
             {
@@ -87,25 +84,31 @@ namespace OpenTween.Jobs
                 TweenInternal<T> t = Tweens[index];
                 TweenOptions<T> options = Options[index];
 
-                // ReSharper disable once InvertIf
-                if (Hint.Likely(TweenLogic.UpdateTime(ref t, options.AutoPlay, options.Duration, DT)))
+                float totalDuration = options.Duration + options.PrePlayDelay + options.PostPlayDelay;
+                if (Hint.Likely(TweenLogic.UpdateTime(ref t, totalDuration, DelaTime)))
                 {
-                    if (Hint.Unlikely(t.CurrentTime <= 0))
+                    if (t.CurrentTime > options.PrePlayDelay)
                     {
-                        t.LerpParameter = 0;
-                    }
-                    else if (t.CurrentTime >= options.Duration)
-                    {
-                        t.LerpParameter = 1;
-                    }
-                    else
-                    {
-                        t.LerpParameter = JobEaseMap.Evaluate(options.Ease, t.CurrentTime, options.Duration, 0, 0);
-                    }
+                        float time = t.CurrentTime - options.PrePlayDelay - options.PostPlayDelay;
 
-                    t.IsUpdatedInLastFrame = true;
-                    Tweens[index] = t;
+                        if (time <= 0)
+                        {
+                            t.LerpParameter = 0;
+                        }
+                        else if (time >= options.Duration)
+                        {
+                            t.LerpParameter = 1;
+                        }
+                        else
+                        {
+                            t.LerpParameter = JobEaseMap.Evaluate(options.Ease, time, options.Duration, options.OvershootOrAmplitude, options.Period);
+                        }
+
+                        t.IsUpdatedInLastFrame = true;
+                    }
                 }
+
+                Tweens[index] = t;
             }
         }
     }

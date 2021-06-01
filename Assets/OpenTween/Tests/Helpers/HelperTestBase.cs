@@ -25,7 +25,7 @@ namespace OpenTween.Helpers
             TweenValues<Vector3>.End = Vector3.right;
 
             TweenValues<Vector4>.Start = Vector4.zero;
-            ;
+            
             TweenValues<Vector4>.End = Vector4.one;
 
             TweenValues<Quaternion>.Start = Quaternion.Euler(0, 90, 0);
@@ -41,11 +41,7 @@ namespace OpenTween.Helpers
         [OneTimeSetUp]
         public void SetAssertions()
         {
-            Assertions<Vector2>.AreEqual = AssertEqual;
-            Assertions<Vector3>.AreEqual = AssertEqual;
-            Assertions<Vector4>.AreEqual = AssertEqual;
-            Assertions<Quaternion>.AreEqual = AssertEqual;
-            Assertions<float>.AreEqual = AssertEqual;
+            Assertions.Init();
         }
 
         [TearDown]
@@ -69,19 +65,19 @@ namespace OpenTween.Helpers
         {
             Func<TComponent, T> getter = property.Compile();
             Action<TComponent, T> setter = ExpressionHelper.CreateSetter(property);
-            
+
             yield return RunTween(creator, getter);
             yield return RunTweenDestroyInMiddle(creator);
             yield return RunTweenDynStart(creator, getter, setter);
-        } 
-        
+        }
+
         protected virtual TComponent Create()
         {
             var obj = new GameObject("Test " + typeof(TComponent).Name, typeof(TComponent));
             Created.Add(obj);
             return obj.GetComponent<TComponent>();
         }
-        
+
         private IEnumerator RunTween<T>(TweenCreator<T> creator, Func<TComponent, T> getter)
         {
             TComponent comp = Create();
@@ -123,33 +119,6 @@ namespace OpenTween.Helpers
             Assertions<T>.AreEqual(TweenValues<T>.Start, tween.Start, "RunTweenDynStart: Start value is not evaluated.");
             yield return new WaitForSeconds(Duration + 0.1f);
             Assertions<T>.AreEqual(TweenValues<T>.End, getter(comp), "RunTweenDynStart: Invalid end value.");
-        }
-
-
-
-        private static void AssertEqual(Vector4 a, Vector4 b, string message)
-        {
-            Assert.LessOrEqual((a - b).magnitude, 0.001f, message);
-        }
-
-        private static void AssertEqual(Vector3 a, Vector3 b, string message)
-        {
-            Assert.LessOrEqual((a - b).magnitude, 0.001f, message);
-        }
-
-        private static void AssertEqual(Vector2 a, Vector2 b, string message)
-        {
-            Assert.LessOrEqual((a - b).magnitude, 0.001f, message);
-        }
-
-        private static void AssertEqual(Quaternion a, Quaternion b, string message)
-        {
-            Assert.True(a == b, message);
-        }
-
-        private static void AssertEqual(float a, float b, string message)
-        {
-            Assert.LessOrEqual((a - b), 0.001f, message);
         }
     }
 }

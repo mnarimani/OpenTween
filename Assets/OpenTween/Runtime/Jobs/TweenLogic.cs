@@ -29,14 +29,8 @@ namespace OpenTween.Jobs
         }
 
         [BurstCompile]
-        public static bool UpdateTime<TTween>(ref TTween t, bool autoPlay, float duration, float dt)
-            where TTween : ITweenBaseInternal
+        public static bool UpdateTime<TTween>(ref TTween t, float duration, float dt) where TTween : ITweenBaseInternal
         {
-            if (Hint.Likely(autoPlay) && t.State == TweenState.NotPlayed)
-            {
-                t.State = TweenState.Running;
-            }
-
             if (Hint.Likely(t.State == TweenState.Running))
             {
                 t.CurrentTime += dt;
@@ -45,10 +39,6 @@ namespace OpenTween.Jobs
                 {
                     t.CurrentTime = duration;
                     t.State = TweenState.Completed;
-                }
-
-                if (t.State == TweenState.Completed)
-                {
                     t.IsCompletedInLastFrame = true;
                 }
 
@@ -63,10 +53,6 @@ namespace OpenTween.Jobs
                 {
                     t.State = TweenState.RewindCompleted;
                     t.CurrentTime = 0;
-                }
-
-                if (t.State == TweenState.RewindCompleted)
-                {
                     t.IsRewindCompletedInLastFrame = true;
                 }
 

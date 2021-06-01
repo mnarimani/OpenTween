@@ -29,7 +29,8 @@ namespace OpenTween.Jobs
             if (Hint.Unlikely(!t.IsUpdatedInLastFrame))
                 return;
             TweenOptions<quaternion> options = Options[index];
-            t.CurrentValue = math.slerp(options.Start, options.End, t.LerpParameter);
+            var end = options.IsRelative ? math.mul(options.Start,  options.End) : options.End;
+            t.CurrentValue = math.slerp(options.Start, end, t.LerpParameter);
             Array[index] = t;
         }
     }

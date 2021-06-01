@@ -7,7 +7,7 @@ namespace OpenTween.Jobs
         bool DisposeOnComplete { get; set; }
         bool AutoPlay { get; set; }
         float PrePlayDelay { get; set; }
-        float PosPlayDelay { get; set; }
+        float PostPlayDelay { get; set; }
         void ResetToDefaults();
     }
 
@@ -31,15 +31,12 @@ namespace OpenTween.Jobs
         public bool IsLocal;
         public bool IsRelative;
         public bool IsFrom;
-        public bool DisposeOnComplete;
-        public float PrePlayDelay;
-        public float PostPlayDelay;
-        public bool AutoPlay;
-        private bool _disposeOnComplete;
-        private bool _autoPlay;
-        private float _prePlayDelay;
-        private float _posPlayDelay;
-
+        public bool DisposeOnComplete { get; set; }
+        public float PrePlayDelay { get; set; }
+        public float PostPlayDelay { get; set; }
+        public bool AutoPlay { get; set; }
+        public int Version { get; set; }
+        public float Duration { get; set; }
         public static TweenOptions<T> Default
         {
             get
@@ -68,7 +65,7 @@ namespace OpenTween.Jobs
             LoopCount = 1;
             LoopType = LoopType.Restart;
             PrePlayDelay = 0;
-            PostPlayDelay = 1;
+            PostPlayDelay = 0;
         }
 
         public void CopyFrom(TweenOptions<T> options)
@@ -94,15 +91,6 @@ namespace OpenTween.Jobs
             PostPlayDelay = options.PostPlayDelay;
         }
 
-        public int Version { get; set; }
-        public float Duration { get; set; }
 
-        bool IOptions.DisposeOnComplete { get => _disposeOnComplete; set => _disposeOnComplete = value; }
-
-        bool IOptions.AutoPlay { get => _autoPlay; set => _autoPlay = value; }
-
-        float IOptions.PrePlayDelay { get => _prePlayDelay; set => _prePlayDelay = value; }
-
-        float IOptions.PosPlayDelay { get => _posPlayDelay; set => _posPlayDelay = value; }
     }
 }

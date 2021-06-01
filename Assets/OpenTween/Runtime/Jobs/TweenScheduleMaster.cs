@@ -19,29 +19,32 @@ namespace OpenTween
     [ExecuteAlways]
     internal class TweenScheduleMaster : MonoBehaviour
     {
-        [RuntimeInitializeOnLoadMethod]
-#if UNITY_EDITOR
-        [InitializeOnLoadMethod]
-#endif
         private static void Initialize()
         {
-            var obj = new GameObject(nameof(TweenScheduleMaster), typeof(TweenScheduleMaster)) {hideFlags = HideFlags.HideAndDontSave};
+            _obj = new GameObject(nameof(TweenScheduleMaster), typeof(TweenScheduleMaster)) {hideFlags = HideFlags.HideAndDontSave}
+                .GetComponent<TweenScheduleMaster>();
 
             if (Application.isPlaying)
-                DontDestroyOnLoad(obj);
+                DontDestroyOnLoad(_obj);
         }
 
-        private static List<Action<float>> _schedules = new List<Action<float>>();
-        private static List<Action> _completes = new List<Action>();
+        private static TweenScheduleMaster _obj;
+
+        private readonly List<Action<float>> _schedules = new List<Action<float>>();
+        private readonly List<Action> _completes = new List<Action>();
 
         public static void RegisterSchedule(Action<float> schedule)
         {
-            _schedules.Add(schedule);
+            if (_obj == null)
+                Initialize();
+            _obj._schedules.Add(schedule);
         }
-        
+
         public static void RegisterComplete(Action complete)
         {
-            _completes.Add(complete);
+            if (_obj == null)
+                Initialize();
+            _obj._completes.Add(complete);
         }
 
         private void Update()
@@ -52,7 +55,7 @@ namespace OpenTween
             {
                 s(dt);
             }
-            
+
             foreach (Action c in _completes)
             {
                 c();
