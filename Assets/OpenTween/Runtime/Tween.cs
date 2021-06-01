@@ -15,7 +15,7 @@ using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<bool>;
 
 namespace OpenTween
 {
-    public readonly partial struct Tween<T> : IDisposable, ITween
+    public readonly partial struct Tween<T> : IDisposable, ITweenBase
     {
         private readonly int _index;
         private readonly int _version;
@@ -30,7 +30,7 @@ namespace OpenTween
         {
             get
             {
-                ref TweenOptions<T> opt = ref TweenRegistry<T, TweenManagedReferences<T>>.GetOptionsByRef(_index);
+                ref TweenOptions<T> opt = ref TweenRegistry<T>.Instance.GetOptionsByRef(_index);
                 AssertActive(opt.Version);
                 return ref opt;
             }
@@ -40,17 +40,17 @@ namespace OpenTween
         {
             get
             {
-                TweenManagedReferences<T> refs = TweenRegistry<T, TweenManagedReferences<T>>.GetManagedReferences(_index);
+                TweenManagedReferences<T> refs = TweenRegistry<T>.Instance.GetManagedReferences(_index);
                 AssertActive(refs.Version);
                 return refs;
             }
         }
 
-        private ref TweenInternal<T> InternalTween
+        internal ref TweenInternal<T> InternalTween
         {
             get
             {
-                ref TweenInternal<T> t = ref TweenRegistry<T, TweenManagedReferences<T>>.GetByRef(_index);
+                ref TweenInternal<T> t = ref TweenRegistry<T>.Instance.GetByRef(_index);
                 AssertActive(t.Version);
                 return ref t;
             }
@@ -70,56 +70,56 @@ namespace OpenTween
 
         public Tween<T> Play(bool restart = false)
         {
-            TweenLogic.PlayTween<T>(_index, restart);
+            TweenRegistry<T>.Instance.Play(_index, restart);
             return this;
         }
 
         public Tween<T> Rewind(bool restart = false)
         {
-            TweenLogic.Rewind<T, TweenManagedReferences<T>>(_index, restart);
+            TweenRegistry<T>.Instance.Rewind(_index, restart);
             return this;
         }
 
         public Tween<T> ForceComplete()
         {
-            TweenLogic.ForceComplete<T, TweenManagedReferences<T>>(_index);
+            TweenRegistry<T>.Instance.ForceComplete(_index);
             return this;
         }
 
         public Tween<T> Pause()
         {
-            TweenLogic.Pause<T, TweenManagedReferences<T>>(_index);
+            TweenRegistry<T>.Instance.Pause(_index);
             return this;
         }
 
         public Task AwaitPlayStart()
         {
-            return TweenLogic.AwaitPlayStart<T, TweenManagedReferences<T>>(_index);
+            return TweenRegistry<T>.Instance.AwaitPlayStart(_index);
         }
 
         public Task AwaitPause()
         {
-            return TweenLogic.AwaitPause<T, TweenManagedReferences<T>>(_index);
+            return TweenRegistry<T>.Instance.AwaitPause(_index);
         }
 
         public Task AwaitCompletion()
         {
-            return TweenLogic.AwaitCompletion<T, TweenManagedReferences<T>>(_index);
+            return TweenRegistry<T>.Instance.AwaitCompletion(_index);
         }
 
         public Task AwaitRewindStart()
         {
-            return TweenLogic.AwaitRewindStart<T, TweenManagedReferences<T>>(_index);
+            return TweenRegistry<T>.Instance.AwaitRewindStart(_index);
         }
 
         public Task AwaitRewindCompletion()
         {
-            return TweenLogic.AwaitRewindCompletion<T, TweenManagedReferences<T>>(_index);
+            return TweenRegistry<T>.Instance.AwaitRewindCompletion(_index);
         }
 
         public Task AwaitDispose()
         {
-            return TweenLogic.AwaitDispose<T, TweenManagedReferences<T>>(_index);
+            return TweenRegistry<T>.Instance.AwaitDispose(_index);
         }
 
         public Tween<T> BindToComponent(Component c)
@@ -138,14 +138,14 @@ namespace OpenTween
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool IsActive()
         {
-            ref TweenInternal<T> t = ref TweenRegistry<T, TweenManagedReferences<T>>.GetByRef(_index);
+            ref TweenInternal<T> t = ref TweenRegistry<T>.Instance.GetByRef(_index);
             return t.Version == _version;
         }
 
         public void Dispose()
         {
             if (!IsActive()) return;
-            TweenRegistry<T, TweenManagedReferences<T>>.Return(_index);
+            TweenRegistry<T>.Instance.Return(_index);
         }
     }
 }

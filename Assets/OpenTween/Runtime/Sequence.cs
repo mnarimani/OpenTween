@@ -1,13 +1,14 @@
 ﻿// using System;
 // using System.Runtime.CompilerServices;
+// using OpenTween.Jobs;
 // using UnityEngine;
 // #if UNITASK
 // using Task = Cysharp.Threading.Tasks.UniTask;
 // using TaskCompletionSource = Cysharp.Threading.Tasks.AutoResetUniTaskCompletionSource;
 //
 // #else
-// using Task = System.Threading.Tasks.Task;
-// using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<bool>;
+//  using Task = System.Threading.Tasks.Task;
+//  using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<bool>;
 // #endif
 //
 //
@@ -16,169 +17,83 @@
 //     public readonly struct Sequence : IDisposable
 //     {
 //         private readonly int _version;
-//         private readonly SequenceInternal _core;
+//         private readonly int _index;
 //
-//         internal Sequence(SequenceInternal core)
+//         public Sequence(int version, int index)
 //         {
-//             _core = core;
-//             _version = _core.Version;
+//             _version = version;
+//             _index = index;
 //         }
 //
-//         /*
+//         private ref SequenceOptions Options
+//         {
+//             get
+//             {
+//                 ref SequenceOptions opt = ref SequenceRegistry.Instance.GetOptionsByRef(_index);
+//                 AssertActive(opt.Version);
+//                 return ref opt;
+//             }
+//         }
+//
+//         private SequenceReferences Refs
+//         {
+//             get
+//             {
+//                 SequenceReferences refs = SequenceRegistry.Instance.GetManagedReferences(_index);
+//                 AssertActive(refs.Version);
+//                 return refs;
+//             }
+//         }
+//
+//         private ref SequenceInternal InternalSequence
+//         {
+//             get
+//             {
+//                 ref SequenceInternal t = ref SequenceRegistry.Instance.GetByRef(_index);
+//                 AssertActive(t.Version);
+//                 return ref t;
+//             }
+//         }
+//
+//
 //         public static Sequence Create()
 //         {
-//             return new Sequence(TweenPool<SequenceInternal>.GetNew());
-//         }*/
+//             int id = SequenceRegistry.Instance.New();
 //
-//         public bool DisposeOnComplete
-//         {
-//             get
-//             {
-//                 AssertActive();
-//                 return _core.Options.DisposeOnComplete;
-//             }
-//             set
-//             {
-//                 AssertActive();
-//                 _core.Options.DisposeOnComplete = value;
-//             }
+//             ref SequenceInternal t = ref SequenceRegistry.Instance.GetByRef(id);
+//             t.CurrentTime = 0;
+//
+//             return new Sequence(id, t.Version);
 //         }
 //
-//         public float CurrentTime
-//         {
-//             get
-//             {
-//                 AssertActive();
-//                 return _core.CurrentTime;
-//             }
-//         }
+//         public bool DisposeOnComplete { get => Options.DisposeOnComplete; set => Options.DisposeOnComplete = value; }
 //
-//         public TweenState State
-//         {
-//             get
-//             {
-//                 AssertActive();
-//                 return _core.State;
-//             }
-//         }
+//         public float CurrentTime => InternalSequence.CurrentTime;
 //
-//         public event Action PlayStarted
-//         {
-//             add
-//             {
-//                 AssertActive();
-//                 _core.PlayStarted += value;
-//             }
-//             remove
-//             {
-//                 AssertActive();
-//                 _core.PlayStarted -= value;
-//             }
-//         }
-//
-//         public event Action Paused
-//         {
-//             add
-//             {
-//                 AssertActive();
-//                 _core.Paused += value;
-//             }
-//             remove
-//             {
-//                 AssertActive();
-//                 _core.Paused -= value;
-//             }
-//         }
-//
-//         public event Action Completed
-//         {
-//             add
-//             {
-//                 AssertActive();
-//                 _core.Completed += value;
-//             }
-//             remove
-//             {
-//                 AssertActive();
-//                 _core.Completed -= value;
-//             }
-//         }
-//
-//         public event Action RewindStarted
-//         {
-//             add
-//             {
-//                 AssertActive();
-//                 _core.RewindStarted += value;
-//             }
-//             remove
-//             {
-//                 AssertActive();
-//                 _core.RewindStarted -= value;
-//             }
-//         }
-//
-//         public event Action RewindPaused
-//         {
-//             add
-//             {
-//                 AssertActive();
-//                 _core.RewindPaused += value;
-//             }
-//             remove
-//             {
-//                 AssertActive();
-//                 _core.RewindPaused -= value;
-//             }
-//         }
-//
-//         public event Action RewindCompleted
-//         {
-//             add
-//             {
-//                 AssertActive();
-//                 _core.RewindCompleted += value;
-//             }
-//             remove
-//             {
-//                 AssertActive();
-//                 _core.RewindCompleted -= value;
-//             }
-//         }
-//
-//         public event Action Disposing
-//         {
-//             add
-//             {
-//                 AssertActive();
-//                 _core.Disposing += value;
-//             }
-//             remove
-//             {
-//                 AssertActive();
-//                 _core.Disposing -= value;
-//             }
-//         }
+//         public TweenState State => InternalSequence.State;
 //
 //         public Sequence Append(float time)
 //         {
-//             AssertActive();
 //             _core.Append(time);
 //             return this;
 //         }
 //
 //         public Sequence Append(Action callback)
 //         {
-//             AssertActive();
 //             _core.Append(callback);
 //             return this;
 //         }
 //
 //         public Sequence Append<T>(Tween<T> tween)
 //         {
-//             AssertActive();
-//             tween.AssertActive();
-//             _core.Append(tween.Core);
+//             AssertActive(InternalSequence.Version);
+//
+//             ref TweenInternal<T> internalTween = ref tween.InternalTween;
+//             SequenceRegistry.Instance.Append(_index,
+//                 internalTween.Index,
+//                 internalTween.Version,
+//                 TweenRegistry<T>.Instance.GetByInterface
+//             );
 //             return this;
 //         }
 //
@@ -191,9 +106,15 @@
 //
 //         public Sequence Insert<T>(float position, Tween<T> tween)
 //         {
-//             AssertActive();
-//             tween.AssertActive();
-//             _core.Insert(position, tween);
+//             AssertActive(InternalSequence.Version);
+//
+//             ref TweenInternal<T> internalTween = ref tween.InternalTween;
+//             SequenceRegistry.Instance.Insert(_index,
+//                 position,
+//                 internalTween.Index,
+//                 internalTween.Version,
+//                 TweenRegistry<T>.Instance.GetByInterface
+//             );
 //             return this;
 //         }
 //
@@ -262,23 +183,24 @@
 //             AssertActive();
 //             _core.BindToComponent(c);
 //         }
-//         
+//
 //         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-//         private void AssertActive()
+//         private void AssertActive(int coreVersion)
 //         {
-//             if (_core.Version != _version) throw new InvalidOperationException("Sequence has been recycled.");
+//             if (coreVersion != _version) throw new InvalidOperationException("Sequence has been recycled.");
 //         }
 //
 //         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 //         public bool IsActive()
 //         {
-//             return _core.Version == _version;
+//             ref SequenceInternal t = ref SequenceRegistry.Instance.GetByRef(_index);
+//             return t.Version == _version;
 //         }
 //
 //         public void Dispose()
 //         {
 //             if (!IsActive()) return;
-//             _core.Dispose();
+//             SequenceRegistry.Instance.Return(_index);
 //         }
 //     }
 // }

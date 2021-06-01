@@ -3,15 +3,7 @@ using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
 using UnityEngine;
-#if UNITASK
-using Task = Cysharp.Threading.Tasks.UniTask;
-using TaskCompletionSource = Cysharp.Threading.Tasks.AutoResetUniTaskCompletionSource;
 
-#else
-using Task = System.Threading.Tasks.Task;
-using TaskCompletionSource = System.Threading.Tasks.TaskCompletionSource<bool>;
-
-#endif
 
 namespace OpenTween.Jobs
 {
@@ -37,20 +29,21 @@ namespace OpenTween.Jobs
         }
 
         [BurstCompile]
-        public static bool UpdateTime<T>(ref TweenInternal<T> t, ref TweenOptions<T> options, float dt)
+        public static bool UpdateTime<TTween>(ref TTween t, bool autoPlay, float duration, float dt)
+            where TTween : ITweenBaseInternal
         {
-            if (Hint.Likely(options.AutoPlay) && t.State == TweenState.NotPlayed)
+            if (Hint.Likely(autoPlay) && t.State == TweenState.NotPlayed)
             {
                 t.State = TweenState.Running;
             }
-            
+
             if (Hint.Likely(t.State == TweenState.Running))
             {
                 t.CurrentTime += dt;
 
-                if (t.CurrentTime >= options.Duration)
+                if (t.CurrentTime >= duration)
                 {
-                    t.CurrentTime = options.Duration;
+                    t.CurrentTime = duration;
                     t.State = TweenState.Completed;
                 }
 
@@ -81,298 +74,6 @@ namespace OpenTween.Jobs
             }
 
             return false;
-        }
-
-        private static bool PlayBase<T, TRef>(int index, bool restart) where TRef : ManagedReferences, new()
-        {
-            TRef refs = TweenRegistry<T, TRef>.GetManagedReferences(index);
-
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TRef>.Return(index);
-                return false;
-            }
-
-            ref TweenInternal<T> tween = ref TweenRegistry<T, TRef>.GetByRef(index);
-
-            if (restart)
-            {
-                tween.CurrentTime = 0;
-            }
-            else
-            {
-                if (tween.State != TweenState.NotPlayed &&
-                    tween.State != TweenState.Paused &&
-                    tween.State != TweenState.RewindPaused &&
-                    tween.State != TweenState.RewindCompleted)
-                {
-                    return false;
-                }
-            }
-
-            tween.State = TweenState.Running;
-            refs.OnPlayStarted();
-            return true;
-        }
-
-        public static bool PlayTween<T>(int index, bool restart)
-        {
-            TweenManagedReferences<T> refs = TweenRegistry<T, TweenManagedReferences<T>>.GetManagedReferences(index);
-
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TweenManagedReferences<T>>.Return(index);
-                return false;
-            }
-
-            ref TweenInternal<T> tween = ref TweenRegistry<T, TweenManagedReferences<T>>.GetByRef(index);
-            ref TweenOptions<T> options = ref TweenRegistry<T, TweenManagedReferences<T>>.GetOptionsByRef(index);
-
-            if ((tween.State == TweenState.NotPlayed || restart) && options.DynamicStartEvaluation)
-            {
-                options.Start = refs.StartEvalFunc();
-            }
-
-            return PlayBase<T, TweenManagedReferences<T>>(index, restart);
-        }
-
-        public static void Rewind<T, TRef>(int index, bool restart) where TRef : ManagedReferences, new()
-        {
-            TRef refs = TweenRegistry<T, TRef>.GetManagedReferences(index);
-
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TRef>.Return(index);
-                return;
-            }
-
-            ref TweenOptions<T> opt = ref TweenRegistry<T, TRef>.GetOptionsByRef(index);
-            ref TweenInternal<T> tween = ref TweenRegistry<T, TRef>.GetByRef(index);
-
-            if (restart)
-            {
-                tween.CurrentTime = opt.Duration;
-            }
-            else
-            {
-                if (tween.State != TweenState.NotPlayed &&
-                    tween.State != TweenState.Paused &&
-                    tween.State != TweenState.RewindPaused &&
-                    tween.State != TweenState.Completed)
-                {
-                    return;
-                }
-            }
-
-            tween.State = TweenState.RewindRunning;
-            refs.OnRewindStarted();
-        }
-
-        public static void ForceComplete<T, TRef>(int index) where TRef : ManagedReferences, new()
-        {
-            TRef refs = TweenRegistry<T, TRef>.GetManagedReferences(index);
-
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TRef>.Return(index);
-                return;
-            }
-
-            ref TweenOptions<T> opt = ref TweenRegistry<T, TRef>.GetOptionsByRef(index);
-            ref TweenInternal<T> tween = ref TweenRegistry<T, TRef>.GetByRef(index);
-
-            if (tween.State == TweenState.Running)
-            {
-                tween.CurrentTime = opt.Duration;
-                tween.State = TweenState.Completed;
-            }
-            else if (tween.State == TweenState.RewindRunning)
-            {
-                tween.CurrentTime = 0;
-                tween.State = TweenState.RewindCompleted;
-            }
-        }
-
-        public static void Pause<T, TRef>(int index) where TRef : ManagedReferences, new()
-        {
-            TRef refs = TweenRegistry<T, TRef>.GetManagedReferences(index);
-
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TRef>.Return(index);
-                return;
-            }
-
-            ref TweenInternal<T> tween = ref TweenRegistry<T, TRef>.GetByRef(index);
-
-            if (tween.State == TweenState.Running)
-            {
-                tween.State = TweenState.Paused;
-                refs.OnPaused();
-            }
-            else if (tween.State == TweenState.RewindRunning)
-            {
-                tween.State = TweenState.RewindPaused;
-                refs.OnRewindPaused();
-            }
-        }
-
-        public static Task AwaitPlayStart<T, TRef>(int index) where TRef : ManagedReferences, new()
-        {
-            TRef refs = TweenRegistry<T, TRef>.GetManagedReferences(index);
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TRef>.Return(index);
-                return Task.CompletedTask;
-            }
-
-            TaskCompletionSource source = CreateTaskCompletionSource();
-
-            refs.PlayStarted.Add(SetResult);
-
-            return source.Task;
-
-            void SetResult()
-            {
-                SetTaskCompletionResult(source);
-                refs.PlayStarted.Remove(SetResult);
-            }
-        }
-
-        public static Task AwaitPause<T, TRef>(int index) where TRef : ManagedReferences, new()
-        {
-            TRef refs = TweenRegistry<T, TRef>.GetManagedReferences(index);
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TRef>.Return(index);
-                return Task.CompletedTask;
-            }
-
-            TaskCompletionSource source = CreateTaskCompletionSource();
-
-            refs.Paused.Add(SetResult);
-
-            return source.Task;
-
-            void SetResult()
-            {
-                SetTaskCompletionResult(source);
-                refs.Paused.Remove(SetResult);
-            }
-        }
-
-        public static Task AwaitCompletion<T, TRef>(int index) where TRef : ManagedReferences, new()
-        {
-            TRef refs = TweenRegistry<T, TRef>.GetManagedReferences(index);
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TRef>.Return(index);
-                return Task.CompletedTask;
-            }
-
-            TaskCompletionSource source = CreateTaskCompletionSource();
-
-            refs.Completed.Add(SetResult);
-
-            return source.Task;
-
-            void SetResult()
-            {
-                SetTaskCompletionResult(source);
-                refs.Completed.Remove(SetResult);
-            }
-        }
-
-        public static Task AwaitRewindStart<T, TRef>(int index) where TRef : ManagedReferences, new()
-        {
-            TRef refs = TweenRegistry<T, TRef>.GetManagedReferences(index);
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TRef>.Return(index);
-                return Task.CompletedTask;
-            }
-
-            TaskCompletionSource source = CreateTaskCompletionSource();
-
-            refs.RewindStarted.Add(SetResult);
-
-            return source.Task;
-
-            void SetResult()
-            {
-                SetTaskCompletionResult(source);
-                refs.RewindStarted.Remove(SetResult);
-            }
-        }
-
-        public static Task AwaitRewindCompletion<T, TRef>(int index) where TRef : ManagedReferences, new()
-        {
-            TRef refs = TweenRegistry<T, TRef>.GetManagedReferences(index);
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TRef>.Return(index);
-                return Task.CompletedTask;
-            }
-
-            TaskCompletionSource source = CreateTaskCompletionSource();
-
-            refs.RewindCompleted.Add(SetResult);
-
-            return source.Task;
-
-            void SetResult()
-            {
-                SetTaskCompletionResult(source);
-                refs.RewindCompleted.Remove(SetResult);
-            }
-        }
-
-        public static Task AwaitDispose<T, TRef>(int index) where TRef : ManagedReferences, new()
-        {
-            TRef refs = TweenRegistry<T, TRef>.GetManagedReferences(index);
-            if (refs.HasBoundComponent && refs.BoundComponent == null)
-            {
-                TweenRegistry<T, TRef>.Return(index);
-                return Task.CompletedTask;
-            }
-
-            TaskCompletionSource source = CreateTaskCompletionSource();
-
-            refs.Disposing.Add(SetResult);
-
-            return source.Task;
-
-            void SetResult()
-            {
-                SetTaskCompletionResult(source);
-                refs.Disposing.Remove(SetResult);
-            }
-        }
-
-
-        private static TaskCompletionSource CreateTaskCompletionSource()
-        {
-#if UNITASK
-            return TaskCompletionSource.Create();
-#else
-            return new TaskCompletionSource<bool>();
-#endif
-        }
-
-        private static void SetTaskCompletionResult(TaskCompletionSource source)
-        {
-            try
-            {
-#if UNITASK
-                source.TrySetResult();
-#else
-                source.TrySetResult(false);
-#endif
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
         }
     }
 }

@@ -12,6 +12,8 @@ namespace OpenTween
     [Serializable]
     public class OpenTweenSettings
     {
+        public const int InnerLoopBatchCount = 32;
+        
         [SerializeField] private int _initialCapacity = 500;
         [SerializeField] private bool _captureCreationStacktrace;
         [SerializeField] private float _defaultOvershootOrAmplitude = 1.70158f;

@@ -1,25 +1,28 @@
 ﻿using System;
-using Unity.Burst;
 
 namespace OpenTween.Jobs
 {
     public interface IOptions
     {
-        bool DisposeOnComplete { get; set;  }
+        bool DisposeOnComplete { get; set; }
         bool AutoPlay { get; set; }
         float PrePlayDelay { get; set; }
         float PosPlayDelay { get; set; }
+        void ResetToDefaults();
     }
-    
-    [Serializable]
-    public struct TweenOptions<T> : IOptions
-    {
-        internal int Version;
 
+    internal interface IOptionsBaseInternal : IOptions
+    {
+        int Version { get; set; }
+        float Duration { get; set; }
+    }
+
+    [Serializable]
+    public struct TweenOptions<T> : IOptionsBaseInternal
+    {
         public T Start;
         public T End;
-        public float Duration;
-        public Ease Ease;
+        public Ease Ease { get; set; }
         public int LoopCount;
         public LoopType LoopType;
         public float OvershootOrAmplitude;
@@ -90,6 +93,9 @@ namespace OpenTween.Jobs
             PrePlayDelay = options.PrePlayDelay;
             PostPlayDelay = options.PostPlayDelay;
         }
+
+        public int Version { get; set; }
+        public float Duration { get; set; }
 
         bool IOptions.DisposeOnComplete { get => _disposeOnComplete; set => _disposeOnComplete = value; }
 

@@ -11,12 +11,12 @@ namespace OpenTween
 
         public static Tween<T> Create<T>(TweenOptions<T> options)
         {
-            int id = TweenRegistry<T, TweenManagedReferences<T>>.New();
+            int id = TweenRegistry<T>.Instance.New();
 
-            ref TweenOptions<T> opt = ref TweenRegistry<T, TweenManagedReferences<T>>.GetOptionsByRef(id);
+            ref TweenOptions<T> opt = ref TweenRegistry<T>.Instance.GetOptionsByRef(id);
             opt.CopyFrom(options);
 
-            ref TweenInternal<T> t = ref TweenRegistry<T, TweenManagedReferences<T>>.GetByRef(id);
+            ref TweenInternal<T> t = ref TweenRegistry<T>.Instance.GetByRef(id);
             t.CurrentTime = 0;
             t.CurrentValue = options.Start;
 

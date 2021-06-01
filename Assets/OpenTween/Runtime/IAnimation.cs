@@ -12,6 +12,6 @@ namespace OpenTween
 {
     public interface IAnimation
     {
-        ITween Play();
+        ITweenBase Play();
     }
 }

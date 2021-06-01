@@ -26,7 +26,7 @@ namespace OpenTween.Jobs
         {
             int index = Indices[i];
             TweenInternal<float4> t = Array[index];
-            if (Hint.Unlikely(!t.ValueChangedInLastFrame))
+            if (Hint.Unlikely(!t.IsUpdatedInLastFrame))
                 return;
             TweenOptions<float4> options = Options[index];
             t.CurrentValue = math.lerp(options.Start, options.End, t.LerpParameter);

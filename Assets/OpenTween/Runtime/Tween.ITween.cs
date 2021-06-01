@@ -4,57 +4,57 @@ namespace OpenTween
 {
     public partial struct Tween<T>
     {
-        ITween ITween.OnPlayStarted(Action callback)
+        ITweenBase ITweenBase.OnPlayStarted(Action callback)
         {
             return OnPlayStarted(callback);
         }
 
-        ITween ITween.OnPaused(Action callback)
+        ITweenBase ITweenBase.OnPaused(Action callback)
         {
             return OnPaused(callback);
         }
 
-        ITween ITween.OnCompleted(Action callback)
+        ITweenBase ITweenBase.OnCompleted(Action callback)
         {
             return OnCompleted(callback);
         }
 
-        ITween ITween.OnRewindStarted(Action callback)
+        ITweenBase ITweenBase.OnRewindStarted(Action callback)
         {
             return OnRewindStarted(callback);
         }
 
-        ITween ITween.OnRewindPaused(Action callback)
+        ITweenBase ITweenBase.OnRewindPaused(Action callback)
         {
             return OnRewindPaused(callback);
         }
 
-        ITween ITween.OnRewindCompleted(Action callback)
+        ITweenBase ITweenBase.OnRewindCompleted(Action callback)
         {
             return OnRewindCompleted(callback);
         }
 
-        ITween ITween.OnDisposing(Action callback)
+        ITweenBase ITweenBase.OnDisposing(Action callback)
         {
             return OnDisposing(callback);
         }
 
-        ITween ITween.Play(bool restart)
+        ITweenBase ITweenBase.Play(bool restart)
         {
             return Play(restart);
         }
 
-        ITween ITween.Rewind(bool restart)
+        ITweenBase ITweenBase.Rewind(bool restart)
         {
             return Rewind(restart);
         }
 
-        ITween ITween.ForceComplete()
+        ITweenBase ITweenBase.ForceComplete()
         {
             return ForceComplete();
         }
 
-        ITween ITween.Pause()
+        ITweenBase ITweenBase.Pause()
         {
             return Pause();
         }

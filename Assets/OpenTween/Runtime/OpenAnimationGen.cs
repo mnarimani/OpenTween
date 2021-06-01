@@ -8,7 +8,7 @@ namespace OpenTween
         public UnityEngine.UI.Image Target;
         public TweenOptions<UnityEngine.Color> Options;
 
-        public ITween Play()
+        public ITweenBase Play()
         {
             var anim = Target.DOColor();
             anim.CopyOptionsFrom(Options);
@@ -28,7 +28,7 @@ namespace OpenTween
         public UnityEngine.RectTransform Target;
         public TweenOptions<UnityEngine.Vector2> Options;
 
-        public ITween Play()
+        public ITweenBase Play()
         {
             var anim = Target.DOAnchorPos();
             anim.CopyOptionsFrom(Options);
@@ -48,7 +48,7 @@ namespace OpenTween
         public UnityEngine.Transform Target;
         public TweenOptions<UnityEngine.Vector3> Options;
 
-        public ITween Play()
+        public ITweenBase Play()
         {
             var anim = Target.DOMove();
             anim.CopyOptionsFrom(Options);
@@ -68,7 +68,7 @@ namespace OpenTween
         public UnityEngine.Transform Target;
         public TweenOptions<UnityEngine.Vector3> Options;
 
-        public ITween Play()
+        public ITweenBase Play()
         {
             var anim = Target.DOLocalMove();
             anim.CopyOptionsFrom(Options);

@@ -16,12 +16,12 @@ namespace OpenTween
             Play(null);
         }
 
-        public void Play(List<ITween> tweens)
+        public void Play(List<ITweenBase> tweens)
         {
             tweens?.Clear();
             foreach (Anim a in _animations)
             {
-                ITween t = a.Animation.Play();
+                ITweenBase t = a.Animation.Play();
                 tweens?.Add(t);
             }
         }

@@ -28,7 +28,7 @@ namespace OpenTween.Jobs
             int index = Indices[i];
             TweenInternal<Color> t = Array[index];
 
-            if (Hint.Unlikely(!t.ValueChangedInLastFrame))
+            if (Hint.Unlikely(!t.IsUpdatedInLastFrame))
                 return;
 
             TweenOptions<Color> options = Options[index];
