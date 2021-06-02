@@ -12,8 +12,9 @@
         bool IsUpdatedInLastFrame { get; set; }
         float Duration { get; }
         void ResetToDefaults();
-        void Save();
-        void Play();
-        void Rewind();
+        void ReadonlySave();
+        bool ReadonlyPlay(bool restart = false);
+        void ReadonlyRewind(bool restart = false);
+        void ReadonlySetTime(float time);
     }
 }

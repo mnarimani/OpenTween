@@ -95,5 +95,11 @@ namespace OpenTween
             AutoPlay = value;
             return this;
         }
+        
+        public Tween<T> SetIsFrom(bool value)
+        {
+            IsFrom = value;
+            return this;
+        }
     }
 }

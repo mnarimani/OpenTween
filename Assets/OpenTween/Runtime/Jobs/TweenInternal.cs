@@ -7,7 +7,7 @@ namespace OpenTween.Jobs
         public T CurrentValue { get; set; }
         public TweenState State { get; set; }
         public float LerpParameter { get; set; }
-        
+
         public bool IsCompletedInLastFrame { get; set; }
         public bool IsRewindCompletedInLastFrame { get; set; }
         public bool IsUpdatedInLastFrame { get; set; }
@@ -33,21 +33,26 @@ namespace OpenTween.Jobs
             LerpParameter = default;
         }
 
-        public void Save()
+        public void ReadonlySave()
         {
-            // TODO: Does this work?
             ref TweenInternal<T> tweenInternal = ref TweenRegistry<T>.Instance.GetByRef(Index);
             tweenInternal = this;
         }
 
-        public void Play()
+        public bool ReadonlyPlay(bool restart)
         {
-            TweenRegistry<T>.Instance.Play(Index, false);
+            return TweenRegistry<T>.Instance.Play(Index, restart);
         }
 
-        public void Rewind()
+        public void ReadonlyRewind(bool restart)
         {
-            TweenRegistry<T>.Instance.Rewind(Index, false);
+            TweenRegistry<T>.Instance.Rewind(Index, restart);
+        }
+
+        public void ReadonlySetTime(float time)
+        {
+            ref TweenInternal<T> tweenInternal = ref TweenRegistry<T>.Instance.GetByRef(Index);
+            tweenInternal.CurrentTime = time;
         }
     }
 }

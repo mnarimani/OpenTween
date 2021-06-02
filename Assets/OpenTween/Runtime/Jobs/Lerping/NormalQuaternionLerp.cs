@@ -5,7 +5,8 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 #if UNITY_COLLECTIONS
-using NativeListInt = Unity.Collections.NativeList<int>; 
+using NativeListInt = Unity.Collections.NativeList<int>;
+
 #else
 using NativeListInt = OpenTween.Jobs.NativeList<int>;
 #endif
@@ -31,7 +32,9 @@ namespace OpenTween.Jobs
                 return;
             TweenOptions<Quaternion> options = Options[index];
             var end = options.IsRelative ? options.Start * options.End : options.End;
-            t.CurrentValue = math.slerp(options.Start, end, t.LerpParameter);
+            t.CurrentValue = options.IsFrom
+                ? math.slerp(end, options.Start, t.LerpParameter)
+                : math.slerp(options.Start, end, t.LerpParameter);
             Array[index] = t;
         }
     }

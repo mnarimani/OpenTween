@@ -26,7 +26,7 @@ namespace OpenTween
             _index = index;
         }
 
-        private ref TweenOptions<T> Options
+        internal ref TweenOptions<T> Options
         {
             get
             {

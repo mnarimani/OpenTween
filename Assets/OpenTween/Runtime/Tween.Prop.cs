@@ -73,6 +73,12 @@ namespace OpenTween
             set => Options.AutoPlay = value;
         }
         
+        public bool IsFrom
+        {
+            get => Options.IsFrom;
+            set => Options.IsFrom = value;
+        }
+        
         public T CurrentValue => InternalTween.CurrentValue;
 
         public float CurrentTime => InternalTween.CurrentTime;
