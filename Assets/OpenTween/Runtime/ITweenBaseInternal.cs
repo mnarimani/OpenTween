@@ -6,15 +6,15 @@
         int Version { get; set; }
         float CurrentTime { get; set; }
         TweenState State { get; set; }
-        float LerpParameter { get; set; }
         bool IsCompletedInLastFrame { get; set; }
         bool IsRewindCompletedInLastFrame { get; set; }
         bool IsUpdatedInLastFrame { get; set; }
-        float Duration { get; }
+        int CurrentLoopCount { get; set; }
         void ResetToDefaults();
         void ReadonlySave();
-        bool ReadonlyPlay(bool restart = false);
-        void ReadonlyRewind(bool restart = false);
-        void ReadonlySetTime(float time);
+        bool RegistryPlay(bool restart = false);
+        void RegistryRewind(bool restart = false);
+        void RegistrySetTime(float time);
+        float GetDurationFromRegistry();
     }
 }

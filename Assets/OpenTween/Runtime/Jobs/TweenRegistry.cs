@@ -1,5 +1,6 @@
 ﻿// ReSharper disable StaticMemberInGenericType
 
+using System;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
@@ -41,6 +42,58 @@ namespace OpenTween.Jobs
             {
                 refs.OnValueUpdated(tween.CurrentValue);
             }
+
+            if ((tween.IsCompletedInLastFrame || tween.IsRewindCompletedInLastFrame) && (options.LoopCount == -1 || tween.CurrentLoopCount < options.LoopCount))
+            {
+                switch (options.LoopType)
+                {
+                    case LoopType.Restart when tween.State == TweenState.Completed:
+                    {
+                        tween.State = TweenState.Running;
+                        tween.CurrentTime = 0;
+                        break;
+                    }
+                    case LoopType.Restart when tween.State == TweenState.RewindCompleted:
+                    {
+                        tween.State = TweenState.RewindRunning;
+                        tween.CurrentTime = options.Duration;
+                        break;
+                    }
+                    case LoopType.YoYo when tween.State == TweenState.Completed:
+                    {
+                        tween.State = TweenState.RewindRunning;
+                        break;
+                    }
+                    case LoopType.YoYo when tween.State == TweenState.RewindCompleted:
+                    {
+                        tween.State = TweenState.Running;
+                        break;
+                    }
+                    case LoopType.Incremental when tween.State == TweenState.Completed:
+                    {
+                        tween.State = TweenState.Running;
+                        tween.CurrentTime = 0;
+                        T diff = TweenValueOp<T>.Sub(options.End, options.Start);
+                        options.Start = options.End;
+                        options.End = TweenValueOp<T>.Add(options.Start, diff);
+                        break;
+                    }
+                    case LoopType.Incremental when tween.State == TweenState.RewindCompleted:
+                    {
+                        tween.State = TweenState.RewindRunning;
+                        tween.CurrentTime = options.Duration;
+                        T diff = TweenValueOp<T>.Sub(options.End, options.Start);
+                        options.Start = options.End;
+                        options.End = TweenValueOp<T>.Add(options.Start, diff);
+                        break;
+                    }
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                tween.IsCompletedInLastFrame = false;
+                tween.IsRewindCompletedInLastFrame = false;
+            }
         }
 
         public override bool Play(int index, bool restart)
@@ -76,7 +129,7 @@ namespace OpenTween.Jobs
             public NativeArray<TweenOptions<T>> Options;
 
             [NativeDisableParallelForRestriction] public NativeArray<TweenInternal<T>> Tweens;
-            
+
             [BurstCompile]
             public void Execute(int i)
             {
@@ -84,10 +137,9 @@ namespace OpenTween.Jobs
                 TweenInternal<T> t = Tweens[index];
                 TweenOptions<T> options = Options[index];
 
-                float totalDuration = options.Duration + options.PrePlayDelay + options.PostPlayDelay;
-                if (Hint.Likely(TweenLogic.UpdateTime(ref t, totalDuration, DelaTime)))
+                if (Hint.Likely(TweenLogic.UpdateTweenTime(ref t, ref options, DelaTime)))
                 {
-                    if (t.CurrentTime > options.PrePlayDelay)
+                    if (t.CurrentTime >= options.PrePlayDelay)
                     {
                         float time = t.CurrentTime - options.PrePlayDelay - options.PostPlayDelay;
 

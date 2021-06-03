@@ -109,12 +109,12 @@ namespace OpenTween
 
         public bool Play(bool restart = false)
         {
-            return InternalSequence.ReadonlyPlay(restart);
+            return InternalSequence.RegistryPlay(restart);
         }
 
         public void Rewind(bool restart = false)
         {
-            InternalSequence.ReadonlyRewind(restart);
+            InternalSequence.RegistryRewind(restart);
         }
 
         public void ForceComplete()

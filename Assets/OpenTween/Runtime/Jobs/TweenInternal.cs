@@ -1,3 +1,5 @@
+using Unity.Burst;
+
 namespace OpenTween.Jobs
 {
     internal struct TweenInternal<T> : ITweenBaseInternal
@@ -5,6 +7,7 @@ namespace OpenTween.Jobs
         public int Version { get; set; }
         public float CurrentTime { get; set; }
         public T CurrentValue { get; set; }
+        public int CurrentLoopCount { get; set; }
         public TweenState State { get; set; }
         public float LerpParameter { get; set; }
 
@@ -20,8 +23,6 @@ namespace OpenTween.Jobs
 
         public int Index { get; set; }
 
-        public float Duration => TweenRegistry<T>.Instance.GetOptionsByRef(Index).Duration;
-
         public void ResetToDefaults()
         {
             CurrentTime = default;
@@ -31,6 +32,7 @@ namespace OpenTween.Jobs
             IsUpdatedInLastFrame = default;
             IsRewindCompletedInLastFrame = default;
             LerpParameter = default;
+            CurrentLoopCount = default;
         }
 
         public void ReadonlySave()
@@ -39,20 +41,25 @@ namespace OpenTween.Jobs
             tweenInternal = this;
         }
 
-        public bool ReadonlyPlay(bool restart)
+        public bool RegistryPlay(bool restart)
         {
             return TweenRegistry<T>.Instance.Play(Index, restart);
         }
 
-        public void ReadonlyRewind(bool restart)
+        public void RegistryRewind(bool restart)
         {
             TweenRegistry<T>.Instance.Rewind(Index, restart);
         }
 
-        public void ReadonlySetTime(float time)
+        public void RegistrySetTime(float time)
         {
             ref TweenInternal<T> tweenInternal = ref TweenRegistry<T>.Instance.GetByRef(Index);
             tweenInternal.CurrentTime = time;
+        }
+
+        public float GetDurationFromRegistry()
+        {
+            return TweenRegistry<T>.Instance.GetOptionsByRef(Index).Duration;
         }
     }
 }

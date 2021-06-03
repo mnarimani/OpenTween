@@ -6,18 +6,16 @@
         public int Version { get; set; }
         public float CurrentTime { get; set; }
         public TweenState State { get; set; }
-        public float LerpParameter { get; set; }
         public bool IsCompletedInLastFrame { get; set; }
         public bool IsRewindCompletedInLastFrame { get; set; }
         public bool IsUpdatedInLastFrame { get; set; }
-
-        public float Duration => SequenceRegistry.Instance.GetManagedReferences(Index).LastInsertPosition;
+        public int CurrentLoopCount { get; set; }
+        // public float PreUpdateTime;
 
         public void ResetToDefaults()
         {
             CurrentTime = default;
             State = TweenState.NotPlayed;
-            LerpParameter = default;
             IsCompletedInLastFrame = default;
             IsRewindCompletedInLastFrame = default;
             IsUpdatedInLastFrame = default;
@@ -30,20 +28,24 @@
             seq = this;
         }
 
-        public bool ReadonlyPlay(bool restart = false)
+        public bool RegistryPlay(bool restart = false)
         {
             return SequenceRegistry.Instance.Play(Index, restart);
         }
 
-        public void ReadonlyRewind(bool restart = false)
+        public void RegistryRewind(bool restart = false)
         {
             SequenceRegistry.Instance.Rewind(Index, restart);
         }
 
-        public void ReadonlySetTime(float time)
+        public void RegistrySetTime(float time)
         {
-            ref SequenceInternal seq = ref SequenceRegistry.Instance.GetByRef(Index);
-            seq.CurrentTime = time;
+            SequenceRegistry.Instance.GetByRef(Index).CurrentTime = time;
+        }
+
+        public float GetDurationFromRegistry()
+        {
+            return SequenceRegistry.Instance.GetOptionsByRef(Index).Duration;
         }
     }
 }
