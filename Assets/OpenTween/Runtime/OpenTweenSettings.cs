@@ -4,7 +4,6 @@ using UnityEngine;
 
 #if UNITY_EDITOR
 using UnityEditor;
-
 #endif
 
 namespace OpenTween
@@ -13,7 +12,7 @@ namespace OpenTween
     public class OpenTweenSettings
     {
         public const int InnerLoopBatchCount = 32;
-        
+        private const string settingFileName = "OpenTweenSettings.asset";
         [SerializeField] private int _initialCapacity = 500;
         [SerializeField] private bool _captureCreationStacktrace;
         [SerializeField] private float _defaultOvershootOrAmplitude = 1.70158f;
@@ -27,7 +26,7 @@ namespace OpenTween
 #endif
         private static void Load()
         {
-            var file = Resources.Load<OpenTweenSettingsFile>("OpenTweenSettings.asset");
+            var file = Resources.Load<OpenTweenSettingsFile>(settingFileName);
             if (file != null)
             {
                 _instance = file.Settings;
@@ -38,7 +37,7 @@ namespace OpenTween
 #if UNITY_EDITOR
             if (!Directory.Exists(Application.dataPath + "/Resources"))
                 AssetDatabase.CreateFolder("Assets", "Resources");
-            AssetDatabase.CreateAsset(file, "Assets/Resources/OpenTweenSettings.asset");
+            AssetDatabase.CreateAsset(file, "Assets/Resources/" + settingFileName);
             AssetDatabase.SaveAssets();
 #endif
 

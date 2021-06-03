@@ -15,7 +15,7 @@ public class TestTween : MonoBehaviour
 
     public int LoopCount = 64000;
     public float TweenDuration = 1;
-    
+
     private Transform[] _testTransforms;
     private bool _track;
     private float _timer;

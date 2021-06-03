@@ -14,7 +14,7 @@ namespace OpenTween.Tweens
             Tween<T> t = Tween.Create<T>()
                 .SetStart(start)
                 .SetEnd(end)
-                .SetIsRelative(true)
+                .SetRelative(true)
                 .SetDuration(1)
                 .SetDisposeOnComplete(false);
 
@@ -53,31 +53,31 @@ namespace OpenTween.Tweens
         public IEnumerator Float3Test()
         {
             var f = new float3(0.5f, 0.5f, 0.5f);
-            return Relative(f, f, new float3(1,1,1));
+            return Relative(f, f, new float3(1, 1, 1));
         }
 
         [UnityTest]
         public IEnumerator Float4Test()
         {
             var f = new float4(0.5f, 0.5f, 0.5f, 0.5f);
-            return Relative(f, f, new float4(1,1,1,1));
+            return Relative(f, f, new float4(1, 1, 1, 1));
         }
 
         [UnityTest]
         public IEnumerator NormalQuaternionTest()
         {
             var q = Quaternion.Euler(0, 90, 0);
-            return Relative(q, q, Quaternion.Euler(0,180,0));
+            return Relative(q, q, Quaternion.Euler(0, 180, 0));
         }
 
         [UnityTest]
         public IEnumerator QuaternionTest()
         {
             var q = quaternion.Euler(0, 90, 0);
-            return Relative(q, q, quaternion.Euler(0,180,0));
+            return Relative(q, q, quaternion.Euler(0, 180, 0));
         }
 
-       
+
         [UnityTest]
         public IEnumerator Vec2Test()
         {
@@ -89,14 +89,14 @@ namespace OpenTween.Tweens
         public IEnumerator Vec3Test()
         {
             var f = new Vector3(0.5f, 0.5f, 0.5f);
-            return Relative(f, f, new Vector3(1,1,1));
+            return Relative(f, f, new Vector3(1, 1, 1));
         }
 
         [UnityTest]
         public IEnumerator Vec4Test()
         {
             var f = new Vector4(0.5f, 0.5f, 0.5f, 0.5f);
-            return Relative(f, f, new Vector4(1,1,1,1));
+            return Relative(f, f, new Vector4(1, 1, 1, 1));
         }
 
     }
