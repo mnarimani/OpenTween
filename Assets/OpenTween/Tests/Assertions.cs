@@ -19,6 +19,17 @@ namespace OpenTween
             Assertions<float2>.AreEqual = AssertEqual;
             Assertions<float3>.AreEqual = AssertEqual;
             Assertions<float4>.AreEqual = AssertEqual;
+            
+            Assertions<Vector2>.AreEqual = AssertEqual;
+            Assertions<Vector3>.AreEqual = AssertEqual;
+            Assertions<Vector4>.AreEqual = AssertEqual;
+            Assertions<Quaternion>.AreEqual = AssertEqual;
+            Assertions<quaternion>.AreEqual = AssertEqual;
+            Assertions<float>.AreEqual = AssertEqual;
+            Assertions<Color>.AreEqual = AssertEqual;
+            Assertions<float2>.AreEqual = AssertEqual;
+            Assertions<float3>.AreEqual = AssertEqual;
+            Assertions<float4>.AreEqual = AssertEqual;
         }
         
         private static void AssertEqual(Color a, Color b, string message)
@@ -73,6 +84,7 @@ namespace OpenTween
             Assert.LessOrEqual((a - b), 0.001f, message);
         }
     }
+    
     public static class Assertions<T>
     {
         public static Action<T, T, string> AreEqual;

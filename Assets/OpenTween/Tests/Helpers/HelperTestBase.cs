@@ -18,24 +18,7 @@ namespace OpenTween.Helpers
         [OneTimeSetUp]
         public void SetTweenValues()
         {
-            TweenValues<Vector2>.Start = Vector2.left;
-            TweenValues<Vector2>.End = Vector2.right;
-
-            TweenValues<Vector3>.Start = Vector3.left;
-            TweenValues<Vector3>.End = Vector3.right;
-
-            TweenValues<Vector4>.Start = Vector4.zero;
-            
-            TweenValues<Vector4>.End = Vector4.one;
-
-            TweenValues<Quaternion>.Start = Quaternion.Euler(0, 90, 0);
-            TweenValues<Quaternion>.End = Quaternion.Euler(0, 180, 0);
-
-            TweenValues<Color>.Start = Color.white;
-            TweenValues<Color>.End = Color.black;
-
-            TweenValues<float>.Start = 0;
-            TweenValues<float>.End = 1;
+         
         }
 
         [OneTimeSetUp]

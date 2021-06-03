@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
@@ -9,33 +7,7 @@ namespace OpenTween.Tweens
 {
     public class Events
     {
-        private class CallbackTracker
-        {
-            private bool[] _called;
 
-            public CallbackTracker(int length)
-            {
-                _called = new bool[length];
-            }
-
-            public Action this[int index] => () => _called[index] = true;
-
-            public void Clear()
-            {
-                for (int index = 0; index < _called.Length; index++)
-                {
-                    _called[index] = false;
-                }
-            }
-
-            public void AssertTrue()
-            {
-                foreach (bool called in _called)
-                {
-                    Assert.IsTrue(called);
-                }
-            }
-        }
 
         private static Tween<float> CreateTween(float duration)
         {

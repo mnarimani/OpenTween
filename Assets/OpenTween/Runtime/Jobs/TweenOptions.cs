@@ -8,13 +8,15 @@ namespace OpenTween.Jobs
         bool AutoPlay { get; set; }
         float PrePlayDelay { get; set; }
         float PostPlayDelay { get; set; }
+        int LoopCount { get; set; }
+        LoopType LoopType { get; set; }
         void ResetToDefaults();
     }
 
     internal interface IOptionsBaseInternal : IOptions
     {
         int Version { get; set; }
-        float Duration { get; set; }
+        float Duration { get; }
     }
 
     [Serializable]
@@ -23,8 +25,8 @@ namespace OpenTween.Jobs
         public T Start;
         public T End;
         public Ease Ease { get; set; }
-        public int LoopCount;
-        public LoopType LoopType;
+        public int LoopCount { get; set; }
+        public LoopType LoopType { get; set; }
         public float OvershootOrAmplitude;
         public float Period;
         public bool DynamicStartEvaluation;

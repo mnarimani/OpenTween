@@ -39,7 +39,10 @@ namespace OpenTween.Jobs
             var end = new float4(e.r, e.g, e.b, e.a);
 
             end = options.IsRelative ? start + end : end;
-            float4 result = math.lerp(start, end, t.LerpParameter);
+
+            float4 result = options.IsFrom
+                ? math.lerp(end, start, t.LerpParameter)
+                : math.lerp(start, end, t.LerpParameter);
 
             t.CurrentValue = new Color(result.x, result.y, result.z, result.w);
 

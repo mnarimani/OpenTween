@@ -1,20 +1,21 @@
 ﻿using Unity.Jobs;
 using Unity.Mathematics;
-using UnityEditor;
 using UnityEngine;
+#if UNITY_EDITOR
+using UnityEditor;
+
+#endif
 
 namespace OpenTween.Jobs
 {
     public class RegistryInitializer
     {
-                [RuntimeInitializeOnLoadMethod]
+        [RuntimeInitializeOnLoadMethod]
 #if UNITY_EDITOR
         [InitializeOnLoadMethod]
 #endif
         private static void Initialize()
         {
-
-
             SetTweenLerp<float>((array, options, indices, handle) => new FloatLerp
             {
                 Array = array,

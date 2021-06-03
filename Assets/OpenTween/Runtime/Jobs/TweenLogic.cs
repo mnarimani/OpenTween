@@ -1,9 +1,6 @@
-﻿using System;
-using Unity.Burst;
+﻿using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Mathematics;
-using UnityEngine;
-
 
 namespace OpenTween.Jobs
 {
@@ -29,7 +26,19 @@ namespace OpenTween.Jobs
         }
 
         [BurstCompile]
-        public static bool UpdateTime<TTween>(ref TTween t, float duration, float dt) where TTween : ITweenBaseInternal
+        public static bool UpdateTweenTime<T>(ref TweenInternal<T> t, ref TweenOptions<T> options, float dt)
+        {
+            return UpdateTimeBase(ref t, options.Duration + options.PrePlayDelay + options.PostPlayDelay, dt);
+        }
+
+        [BurstCompile]
+        public static bool UpdateSequenceTime(ref SequenceInternal t, ref SequenceOptions options, float dt)
+        {
+            return UpdateTimeBase(ref t, options.Duration, dt);
+        }
+
+        [BurstCompile]
+        private static bool UpdateTimeBase<TTween>(ref TTween t, float duration, float dt) where TTween : ITweenBaseInternal
         {
             if (Hint.Likely(t.State == TweenState.Running))
             {
@@ -37,6 +46,7 @@ namespace OpenTween.Jobs
 
                 if (t.CurrentTime >= duration)
                 {
+                    t.CurrentLoopCount++;
                     t.CurrentTime = duration;
                     t.State = TweenState.Completed;
                     t.IsCompletedInLastFrame = true;
@@ -51,6 +61,7 @@ namespace OpenTween.Jobs
 
                 if (t.CurrentTime <= 0)
                 {
+                    t.CurrentLoopCount++;
                     t.State = TweenState.RewindCompleted;
                     t.CurrentTime = 0;
                     t.IsRewindCompletedInLastFrame = true;

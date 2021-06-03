@@ -1,164 +1,163 @@
-﻿// using System;
-// using System.Collections.Generic;
-// using UnityEditor;
-// using UnityEngine;
-//
-// namespace OpenTween.Jobs
-// {
-//     internal struct SequenceInternal : ITweenBaseInternal
-//     {
-//         public int Index { get; set; }
-//         public int Version { get; set; }
-//         public float CurrentTime { get; set; }
-//         public TweenState State { get; set; }
-//         public float LerpParameter { get; set; }
-//         public bool IsCompletedInLastFrame { get; set; }
-//         public bool IsRewindCompletedInLastFrame { get; set; }
-//         public bool IsUpdatedInLastFrame { get; set; }
-//
-//         public float Duration => SequenceRegistry.Instance.GetManagedReferences(Index).LastInsertPosition;
-//
-//         public void ResetToDefaults()
-//         {
-//             CurrentTime = default;
-//             State = TweenState.NotPlayed;
-//             LerpParameter = default;
-//             IsCompletedInLastFrame = default;
-//             IsRewindCompletedInLastFrame = default;
-//             IsUpdatedInLastFrame = default;
-//         }
-//
-//         public void Save()
-//         {
-//             // Does this work?
-//             ref SequenceInternal seq = ref SequenceRegistry.Instance.GetByRef(Index);
-//             seq = this;
-//         }
-//
-//         public void Play()
-//         {
-//             SequenceRegistry.Instance.Play(Index, false);
-//         }
-//
-//         public void Rewind()
-//         {
-//             SequenceRegistry.Instance.Rewind(Index, false);
-//         }
-//     }
-//
-//     internal struct SequenceOptions : IOptionsBaseInternal
-//     {
-//         public bool DisposeOnComplete { get; set; }
-//         public bool AutoPlay { get; set; }
-//         public float PrePlayDelay { get; set; }
-//         public float PosPlayDelay { get; set; }
-//         public Ease Ease { get; set; }
-//
-//         public void ResetToDefaults()
-//         {
-//             throw new System.NotImplementedException();
-//         }
-//
-//         public int Version { get; set; }
-//         public float Duration { get; set; }
-//     }
-//
-//     internal class SequenceReferences : ManagedReferences
-//     {
-//         public List<SequencedCallback> Callbacks { get; } = new List<SequencedCallback>();
-//         public List<SequencedTween> Tweens { get; } = new List<SequencedTween>();
-//         public float LastInsertPosition { get; set; }
-//     }
-//
-//     internal class SequenceRegistry : RegistryBase<SequenceInternal, SequenceOptions, SequenceReferences, SequenceRegistry>
-//     {
-//         public void Append(int index, Action callback)
-//         {
-//             SequenceReferences refs = GetManagedReferences(index);
-//             refs.Callbacks.Add(new SequencedCallback(refs.LastInsertPosition, callback));
-//         }
-//
-//         public void Append(int index, float time)
-//         {
-//             SequenceReferences refs = GetManagedReferences(index);
-//             refs.LastInsertPosition += time;
-//         }
-//
-//         public void Append(int index, int tweenIndex, int tweenVersion, TweenGetter getter)
-//         {
-//             SequenceReferences refs = GetManagedReferences(index);
-//             refs.Tweens.Add(new SequencedTween(refs.LastInsertPosition, tweenIndex, tweenVersion, getter));
-//         }
-//         
-//         public void Insert(int index, float position, Action callback)
-//         {
-//             SequenceReferences refs = GetManagedReferences(index);
-//             refs.Callbacks.Add(new SequencedCallback(position, callback));
-//         }
-//         
-//         public void Insert(int index, float position, int tweenIndex, int tweenVersion, TweenGetter getter)
-//         {
-//             SequenceReferences refs = GetManagedReferences(index);
-//             refs.Tweens.Add(new SequencedTween(position, tweenIndex, tweenVersion, getter));
-//         }
-//
-//         protected override void Schedule(float dt)
-//         {
-//             /*foreach (int index in ActiveIndices)
-//             {
-//                 ref SequenceInternal seq = ref GetByRef(index);
-//                 ref SequenceOptions option = ref GetOptionsByRef(index);
-//
-//                 float last = seq.CurrentTime;
-//
-//                 if (!TweenLogic.UpdateTime(ref seq, option.AutoPlay, option.Duration, dt))
-//                     continue;
-//
-//                 SequenceReferences refs = GetManagedReferences(index);
-//
-//                 foreach (SequencedCallback callback in refs.Callbacks)
-//                 {
-//                     bool isRewind = seq.State == TweenState.RewindRunning;
-//                     float p = callback.Position;
-//
-//                     if ((!isRewind && p > last && p <= seq.CurrentTime) ||
-//                         (isRewind && p > seq.CurrentTime && p <= last))
-//                     {
-//                         try
-//                         {
-//                             callback.Callback.Invoke();
-//                         }
-//                         catch (Exception e)
-//                         {
-//                             Debug.LogException(e);
-//                         }
-//                     }
-//                 }
-//
-//                 foreach (SequencedTween seqT in refs.Tweens)
-//                 {
-//                     ITweenBaseInternal tween = seqT.TweenGetter(seqT.TweenIndex);
-//                     if (seqT.Version != tween.Version)
-//                         continue;
-//
-//                     float delta = tween.CurrentTime - seqT.Position;
-//                     if (delta > 0 & delta <= tween.Duration)
-//                     {
-//                         if (tween.State == TweenState.Running)
-//                             tween.Play();
-//                         else
-//                             tween.Rewind();
-//
-//                         tween.CurrentTime = delta - dt;
-//                         TweenLogic.UpdateTime(ref tween, true, tween.Duration, delta);
-//                         tween.Save();
-//                     }
-//                 }
-//             }*/
-//         }
-//
-//         protected override void ProcessPostComplete(int index, ref SequenceInternal tween, ref SequenceOptions options, SequenceReferences refs)
-//         {
-//         }
-//     }
-// }
+﻿using System;
+using UnityEngine;
+
+namespace OpenTween.Jobs
+{
+    internal class SequenceRegistry : RegistryBase<SequenceInternal, SequenceOptions, SequenceReferences, SequenceRegistry>
+    {
+        private float _lastDeltaTime;
+
+        public void Append(int index, Action callback)
+        {
+            ref var seq = ref GetOptionsByRef(index);
+            SequenceReferences refs = GetManagedReferences(index);
+            refs.Callbacks.Add(new SequencedCallback(seq.Duration, callback));
+        }
+
+        public void Append(int index, float time)
+        {
+            ref var seq = ref GetOptionsByRef(index);
+            seq.Duration += time;
+        }
+
+        public void Append<T>(int index, Tween<T> tween)
+        {
+            ref var seq = ref GetOptionsByRef(index);
+            Insert(index, seq.Duration, tween);
+        }
+
+        public void Insert(int index, float position, Action callback)
+        {
+            SequenceReferences refs = GetManagedReferences(index);
+            refs.Callbacks.Add(new SequencedCallback(position, callback));
+        }
+
+        public void Insert<T>(int index, float position, Tween<T> tween)
+        {
+            SequenceReferences refs = GetManagedReferences(index);
+            ref var seq = ref GetOptionsByRef(index);
+
+            ref TweenInternal<T> tweenInternalTween = ref tween.InternalTween;
+            tween.Options.DisposeOnComplete = false;
+            tween.Options.AutoPlay = false;
+            refs.Tweens.Add(new SequencedTween(
+                position,
+                tweenInternalTween.Index,
+                tweenInternalTween.Version,
+                tweenIndex => TweenRegistry<T>.Instance.GetByInterface(tweenIndex)
+            ));
+
+            seq.Duration = Mathf.Max(position + tween.Duration, seq.Duration);
+        }
+
+        public void Join<T>(int index, Tween<T> tween)
+        {
+            SequenceReferences refs = GetManagedReferences(index);
+            float position = refs.Tweens[refs.Tweens.Count - 1].Position;
+            Insert(index, position, tween);
+        }
+
+        protected override void Schedule(float dt)
+        {
+            _lastDeltaTime = dt;
+            if (!IsInitialized)
+                return;
+
+            base.Schedule(dt);
+
+            foreach (int index in ActiveIndices)
+            {
+                var refs = GetManagedReferences(index);
+                ref SequenceInternal seq = ref GetByRef(index);
+                ref SequenceOptions option = ref GetOptionsByRef(index);
+                var preUpdateTime = seq.CurrentTime;
+                
+                if (!TweenLogic.UpdateSequenceTime(ref seq, ref option, dt)) 
+                    continue;
+                
+                foreach (SequencedCallback callback in refs.Callbacks)
+                {
+                    bool isRewind = seq.State == TweenState.RewindRunning;
+                    float p = callback.Position;
+
+                    if ((!isRewind && p >= preUpdateTime && p <= seq.CurrentTime) ||
+                        (isRewind && p >= seq.CurrentTime && p <= preUpdateTime))
+                    {
+                        try
+                        {
+                            callback.Callback.Invoke();
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogException(e);
+                        }
+                    }
+                }
+
+                foreach (SequencedTween nestedTween in refs.Tweens)
+                {
+                    ITweenBaseInternal tween = nestedTween.TweenGetter(nestedTween.TweenIndex);
+                    if (nestedTween.Version != tween.Version)
+                        continue;
+
+                    float delta = seq.CurrentTime - nestedTween.Position;
+                    if (delta < 0)
+                    {
+                        tween.State = TweenState.NotPlayed;
+                    }
+                    else if (delta > tween.GetDurationFromRegistry())
+                    {
+                        tween.State = TweenState.Completed;
+                    }
+                    else
+                    {
+                        if (seq.State == TweenState.Running && seq.State != tween.State)
+                            tween.RegistryPlay();
+                        else if (seq.State == TweenState.RewindRunning && seq.State != tween.State)
+                            tween.RegistryRewind();
+
+                        tween.RegistrySetTime(delta - _lastDeltaTime);
+                    }
+                }
+            }
+        }
+
+        protected override void ProcessPostComplete(int index, ref SequenceInternal seq, ref SequenceOptions options, SequenceReferences refs)
+        {
+            if (seq.IsCompletedInLastFrame && (options.LoopCount == -1 || seq.CurrentLoopCount < options.LoopCount))
+            {
+                switch (options.LoopType)
+                {
+                    case LoopType.Restart when seq.State == TweenState.Completed:
+                    {
+                        seq.State = TweenState.Running;
+                        seq.CurrentTime = 0;
+                        break;
+                    }
+                    case LoopType.Restart when seq.State == TweenState.RewindCompleted:
+                    {
+                        seq.State = TweenState.RewindRunning;
+                        seq.CurrentTime = options.Duration;
+                        break;
+                    }
+                    case LoopType.YoYo when seq.State == TweenState.Completed:
+                    {
+                        seq.State = TweenState.RewindRunning;
+                        break;
+                    }
+                    case LoopType.YoYo when seq.State == TweenState.RewindCompleted:
+                    {
+                        seq.State = TweenState.Running;
+                        break;
+                    }
+                    case LoopType.Incremental:
+                        throw new ArgumentException("Incremental Looping is not supported for sequences");
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+
+                seq.IsCompletedInLastFrame = false;
+            }
+        }
+    }
+}

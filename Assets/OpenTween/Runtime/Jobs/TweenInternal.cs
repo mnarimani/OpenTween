@@ -1,3 +1,5 @@
+using Unity.Burst;
+
 namespace OpenTween.Jobs
 {
     internal struct TweenInternal<T> : ITweenBaseInternal
@@ -5,9 +7,10 @@ namespace OpenTween.Jobs
         public int Version { get; set; }
         public float CurrentTime { get; set; }
         public T CurrentValue { get; set; }
+        public int CurrentLoopCount { get; set; }
         public TweenState State { get; set; }
         public float LerpParameter { get; set; }
-        
+
         public bool IsCompletedInLastFrame { get; set; }
         public bool IsRewindCompletedInLastFrame { get; set; }
         public bool IsUpdatedInLastFrame { get; set; }
@@ -20,8 +23,6 @@ namespace OpenTween.Jobs
 
         public int Index { get; set; }
 
-        public float Duration => TweenRegistry<T>.Instance.GetOptionsByRef(Index).Duration;
-
         public void ResetToDefaults()
         {
             CurrentTime = default;
@@ -31,23 +32,34 @@ namespace OpenTween.Jobs
             IsUpdatedInLastFrame = default;
             IsRewindCompletedInLastFrame = default;
             LerpParameter = default;
+            CurrentLoopCount = default;
         }
 
-        public void Save()
+        public void ReadonlySave()
         {
-            // TODO: Does this work?
             ref TweenInternal<T> tweenInternal = ref TweenRegistry<T>.Instance.GetByRef(Index);
             tweenInternal = this;
         }
 
-        public void Play()
+        public bool RegistryPlay(bool restart)
         {
-            TweenRegistry<T>.Instance.Play(Index, false);
+            return TweenRegistry<T>.Instance.Play(Index, restart);
         }
 
-        public void Rewind()
+        public void RegistryRewind(bool restart)
         {
-            TweenRegistry<T>.Instance.Rewind(Index, false);
+            TweenRegistry<T>.Instance.Rewind(Index, restart);
+        }
+
+        public void RegistrySetTime(float time)
+        {
+            ref TweenInternal<T> tweenInternal = ref TweenRegistry<T>.Instance.GetByRef(Index);
+            tweenInternal.CurrentTime = time;
+        }
+
+        public float GetDurationFromRegistry()
+        {
+            return TweenRegistry<T>.Instance.GetOptionsByRef(Index).Duration;
         }
     }
 }

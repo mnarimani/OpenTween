@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using OpenTween.Jobs;
 
 namespace OpenTween
@@ -29,15 +30,10 @@ namespace OpenTween
             return this;
         }
 
-        public Tween<T> SetLoopCount(int value)
+        public Tween<T> SetLoops(int loops, LoopType type = LoopType.Restart)
         {
-            LoopCount = value;
-            return this;
-        }
-
-        public Tween<T> SetLoopType(LoopType value)
-        {
-            LoopType = value;
+            LoopCount = loops;
+            LoopType = type;
             return this;
         }
 
@@ -93,6 +89,12 @@ namespace OpenTween
         public Tween<T> SetAutoPlay(bool value)
         {
             AutoPlay = value;
+            return this;
+        }
+        
+        public Tween<T> SetIsFrom(bool value)
+        {
+            IsFrom = value;
             return this;
         }
     }
