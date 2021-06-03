@@ -23,7 +23,7 @@ namespace OpenTween.Tweens
             //yield return null;
 
             //Assertions<T>.AreEqual(sum, t.CurrentValue, "");
-            
+
             yield return new WaitForSeconds(t.Duration);
 
             Assertions<T>.AreEqual(start, t.CurrentValue, "");
@@ -62,7 +62,7 @@ namespace OpenTween.Tweens
         {
             var f1 = new float3(0.2f, 0.2f, 0.2f);
             var f2 = new float3(0.5f, 0.5f, 0.5f);
-            return FromRelative(f1, f2, new float3(0.7f,0.7f,0.7f));
+            return FromRelative(f1, f2, new float3(0.7f, 0.7f, 0.7f));
         }
 
         [UnityTest]
@@ -70,7 +70,7 @@ namespace OpenTween.Tweens
         {
             var f1 = new float4(0.2f, 0.2f, 0.2f, 0.2f);
             var f2 = new float4(0.5f, 0.5f, 0.5f, 0.5f);
-            return FromRelative(f1, f2, new float4(0.7f,0.7f,0.7f,0.7f));
+            return FromRelative(f1, f2, new float4(0.7f, 0.7f, 0.7f, 0.7f));
         }
 
         [UnityTest]
@@ -78,7 +78,7 @@ namespace OpenTween.Tweens
         {
             var q1 = Quaternion.Euler(0, 20, 0);
             var q2 = Quaternion.Euler(0, 60, 0);
-            return FromRelative(q1, q2, Quaternion.Euler(0,80,0));
+            return FromRelative(q1, q2, Quaternion.Euler(0, 80, 0));
         }
 
         [UnityTest]
@@ -86,7 +86,7 @@ namespace OpenTween.Tweens
         {
             var q1 = quaternion.Euler(0, 20, 0);
             var q2 = quaternion.Euler(0, 60, 0);
-            return FromRelative(q1, q2, quaternion.Euler(0,80,0));
+            return FromRelative(q1, q2, quaternion.Euler(0, 80, 0));
         }
 
         [UnityTest]
@@ -102,7 +102,7 @@ namespace OpenTween.Tweens
         {
             var f1 = new Vector3(0.2f, 0.2f, 0.2f);
             var f2 = new Vector3(0.5f, 0.5f, 0.5f);
-            return FromRelative(f1, f2, new Vector3(0.7f,0.7f,0.7f));
+            return FromRelative(f1, f2, new Vector3(0.7f, 0.7f, 0.7f));
         }
 
         [UnityTest]
@@ -110,7 +110,7 @@ namespace OpenTween.Tweens
         {
             var f1 = new Vector4(0.2f, 0.2f, 0.2f, 0.2f);
             var f2 = new Vector4(0.5f, 0.5f, 0.5f, 0.5f);
-            return FromRelative(f1, f2, new Vector4(0.7f,0.7f,0.7f,0.7f));
+            return FromRelative(f1, f2, new Vector4(0.7f, 0.7f, 0.7f, 0.7f));
         }
     }
 }

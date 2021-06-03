@@ -62,7 +62,7 @@ namespace OpenTween
             return this;
         }
 
-        public Tween<T> SetRelative(bool value)
+        public Tween<T> SetIsRelative(bool value)
         {
             IsRelative = value;
             return this;
@@ -91,7 +91,7 @@ namespace OpenTween
             AutoPlay = value;
             return this;
         }
-        
+
         public Tween<T> SetIsFrom(bool value)
         {
             IsFrom = value;

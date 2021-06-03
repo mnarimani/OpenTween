@@ -14,7 +14,7 @@ namespace OpenTween.Tweens
             Tween<T> t = Tween.Create<T>()
                 .SetStart(start)
                 .SetEnd(end)
-                .SetRelative(true)
+                .SetIsRelative(true)
                 .SetDuration(1)
                 .SetDisposeOnComplete(false);
 
