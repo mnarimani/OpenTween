@@ -1,33 +1,34 @@
 ﻿using OpenTween.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace OpenTween
 {
     public static partial class UnityHelpers
     {
-        public static Tween<Vector3> DOMove(this Transform t)
+        public static Tween<float3> DOMove(this Transform t)
         {
-            Tween<Vector3> tween = Tween.Create(TweenOptions<Vector3>.Default);
+            Tween<float3> tween = Tween.Create(TweenOptions<float3>.Default);
 
             tween.ValueUpdated += ValueChanged;
             tween.StartEvalFunc = StartEval;
             tween.BindToComponent(t);
             return tween;
 
-            void ValueChanged(Vector3 pos)
+            void ValueChanged(float3 pos)
             {
                 t.position = pos;
             }
 
-            Vector3 StartEval()
+            float3 StartEval()
             {
                 return t.position;
             }
         }
 
-        public static Tween<Vector3> DOMove(this Transform t, Vector3 end, float duration, Ease ease = Ease.OutQuad)
+        public static Tween<float3> DOMove(this Transform t, Vector3 end, float duration, Ease ease = Ease.OutQuad)
         {
-            Tween<Vector3> tween = t.DOMove();
+            Tween<float3> tween = t.DOMove();
 
             tween.End = end;
             tween.Duration = duration;
@@ -37,28 +38,28 @@ namespace OpenTween
             return tween;
         }
 
-        public static Tween<Vector3> DOLocalMove(this Transform t)
+        public static Tween<float3> DOLocalMove(this Transform t)
         {
-            var tween = Tween.Create<Vector3>(default);
+            var tween = Tween.Create<float3>(default);
             tween.ValueUpdated += ValueChanged;
             tween.StartEvalFunc = StartEval;
             tween.BindToComponent(t);
             return tween;
 
-            void ValueChanged(Vector3 pos)
+            void ValueChanged(float3 pos)
             {
                 t.localPosition = pos;
             }
 
-            Vector3 StartEval()
+            float3 StartEval()
             {
                 return t.localPosition;
             }
         }
 
-        public static Tween<Vector3> DOLocalMove(this Transform t, Vector3 end, float duration, Ease ease = Ease.OutQuad)
+        public static Tween<float3> DOLocalMove(this Transform t, Vector3 end, float duration, Ease ease = Ease.OutQuad)
         {
-            Tween<Vector3> tween = t.DOLocalMove();
+            Tween<float3> tween = t.DOLocalMove();
 
             tween.End = end;
             tween.Duration = duration;

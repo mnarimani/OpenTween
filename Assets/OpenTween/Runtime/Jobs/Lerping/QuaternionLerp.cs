@@ -1,6 +1,7 @@
 ﻿using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 #if UNITY_COLLECTIONS
@@ -23,18 +24,21 @@ namespace OpenTween.Jobs
 
         [NativeDisableParallelForRestriction] public NativeArray<TweenInternal<quaternion>> Array;
 
-        public void Execute(int i)
+        public unsafe void Execute(int i)
         {
             int index = Indices[i];
-            TweenInternal<quaternion> t = Array[index];
+            
+            ref TweenInternal<quaternion> t = ref UnsafeUtility.ArrayElementAsRef<TweenInternal<quaternion>>(Array.GetUnsafePtr(), index);
+            
             if (Hint.Unlikely(!t.IsUpdatedInLastFrame))
                 return;
-            TweenOptions<quaternion> options = Options[index];
+            
+            ref TweenOptions<quaternion> options = ref UnsafeUtility.ArrayElementAsRef<TweenOptions<quaternion>>(Options.GetUnsafePtr(), index);
+            
             var end = options.IsRelative ? math.mul(options.Start, options.End) : options.End;
             t.CurrentValue = options.IsFrom
                 ? math.slerp(end, options.Start, t.LerpParameter)
                 : math.slerp(options.Start, end, t.LerpParameter);
-            Array[index] = t;
         }
     }
 }

@@ -3,6 +3,7 @@ using System.Globalization;
 using DG.Tweening;
 using OpenTween;
 using OpenTween.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.UI;
 using Debug = UnityEngine.Debug;
@@ -114,7 +115,8 @@ public class TestTween : MonoBehaviour
         stopwatch.Start();
         for (int i = 0; i < LoopCount; i++)
         {
-            Tween.Create<float>().SetStart(0).SetEnd(10).SetDuration(TweenDuration).Play();
+            float value = 0;
+            Tween.Create<float>().SetStart(0).SetEnd(10).SetDuration(TweenDuration).SetOnValueUpdated(f => value = f);
         }
 
         stopwatch.Stop();
@@ -143,7 +145,7 @@ public class TestTween : MonoBehaviour
 
         foreach (Transform t in _testTransforms)
         {
-            Tween<Vector3> move = UnityHelpers.DOMove(t);
+            Tween<float3> move = UnityHelpers.DOMove(t);
             move.Duration = 60;
             move.Start = new Vector3(-10, 0, 0);
             move.End = new Vector3(10, 0, 0);

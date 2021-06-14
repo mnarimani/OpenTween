@@ -151,7 +151,7 @@ namespace OpenTween.Jobs
         {
             if (!IsInitialized)
                 return;
-
+/*
             for (int i = ActiveIndices.Length - 1; i >= 0; i--)
             {
                 int index = ActiveIndices[i];
@@ -172,11 +172,8 @@ namespace OpenTween.Jobs
                     continue;
                 }
                 
-                if (options.AutoPlay && tween.State == TweenState.NotPlayed)
-                {
-                    tween.State = TweenState.Running;
-                }
-            }
+
+            }*/
         }
 
         public void Complete()

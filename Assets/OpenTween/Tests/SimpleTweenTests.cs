@@ -18,7 +18,7 @@ namespace OpenTween
                 .SetEnd(1)
                 .SetDuration(1)
                 .SetEase(Ease.Linear)
-                .OnValueUpdated(f => value = f);
+                .SetOnValueUpdated(f => value = f);
 
             yield return new WaitForSeconds(0.25f);
 

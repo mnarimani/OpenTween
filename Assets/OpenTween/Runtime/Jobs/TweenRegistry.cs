@@ -4,6 +4,7 @@ using System;
 using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 #if UNITY_COLLECTIONS
@@ -32,7 +33,7 @@ namespace OpenTween.Jobs
                 Tweens = All,
                 Options = AllOptions,
                 Indices = ActiveIndices
-            }.Schedule(ActiveIndices.Length, 64);
+            }.Schedule(ActiveIndices.Length, ActiveIndices.Length / 4);
             JobHandle = LerpScheduler(All, AllOptions, ActiveIndices, JobHandle);
         }
 
@@ -131,11 +132,16 @@ namespace OpenTween.Jobs
             [NativeDisableParallelForRestriction] public NativeArray<TweenInternal<T>> Tweens;
 
             [BurstCompile]
-            public void Execute(int i)
+            public unsafe void Execute(int i)
             {
                 int index = Indices[i];
-                TweenInternal<T> t = Tweens[index];
-                TweenOptions<T> options = Options[index];
+                ref TweenInternal<T> t = ref UnsafeUtility.ArrayElementAsRef<TweenInternal<T>>(Tweens.GetUnsafePtr(), index);
+                ref TweenOptions<T> options = ref UnsafeUtility.ArrayElementAsRef<TweenOptions<T>>(Options.GetUnsafePtr(), index);
+                
+                if (Hint.Likely(options.AutoPlay) && t.State == TweenState.NotPlayed)
+                {
+                    t.State = TweenState.Running;
+                }
 
                 if (Hint.Likely(TweenLogic.UpdateTweenTime(ref t, ref options, DelaTime)))
                 {
@@ -159,8 +165,6 @@ namespace OpenTween.Jobs
                         t.IsUpdatedInLastFrame = true;
                     }
                 }
-
-                Tweens[index] = t;
             }
         }
     }

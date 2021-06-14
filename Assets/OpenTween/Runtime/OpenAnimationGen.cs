@@ -1,4 +1,5 @@
 using OpenTween.Jobs;
+using Unity.Mathematics;
 
 namespace OpenTween
 {
@@ -46,7 +47,7 @@ namespace OpenTween
     public sealed class DOMoveTarget : IAnimation
     {
         public UnityEngine.Transform Target;
-        public TweenOptions<UnityEngine.Vector3> Options;
+        public TweenOptions<float3> Options;
 
         public ITweenBase Play()
         {
@@ -66,7 +67,7 @@ namespace OpenTween
     public sealed class DOLocalMoveTarget : IAnimation
     {
         public UnityEngine.Transform Target;
-        public TweenOptions<UnityEngine.Vector3> Options;
+        public TweenOptions<float3> Options;
 
         public ITweenBase Play()
         {

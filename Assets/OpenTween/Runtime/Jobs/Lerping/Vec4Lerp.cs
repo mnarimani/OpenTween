@@ -1,11 +1,13 @@
 ﻿using Unity.Burst;
 using Unity.Burst.CompilerServices;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 #if UNITY_COLLECTIONS
-using NativeListInt = Unity.Collections.NativeList<int>; 
+using NativeListInt = Unity.Collections.NativeList<int>;
+
 #else
 using NativeListInt = OpenTween.Jobs.NativeList<int>;
 #endif
@@ -23,18 +25,21 @@ namespace OpenTween.Jobs
 
         [NativeDisableParallelForRestriction] public NativeArray<TweenInternal<Vector4>> Array;
 
-        public void Execute(int i)
+        public unsafe void Execute(int i)
         {
             int index = Indices[i];
-            TweenInternal<Vector4> t = Array[index];
+
+            ref TweenInternal<Vector4> t = ref UnsafeUtility.ArrayElementAsRef<TweenInternal<Vector4>>(Array.GetUnsafePtr(), index);
+
             if (Hint.Unlikely(!t.IsUpdatedInLastFrame))
                 return;
-            TweenOptions<Vector4> options = Options[index];
-            var end = options.IsRelative ? options.Start + options.End : options.End;
+
+            ref TweenOptions<Vector4> options = ref UnsafeUtility.ArrayElementAsRef<TweenOptions<Vector4>>(Options.GetUnsafePtr(), index);
+
+            Vector4 end = options.IsRelative ? options.Start + options.End : options.End;
             t.CurrentValue = options.IsFrom
                 ? math.lerp(end, options.Start, t.LerpParameter)
                 : math.lerp(options.Start, end, t.LerpParameter);
-            Array[index] = t;
         }
     }
 }

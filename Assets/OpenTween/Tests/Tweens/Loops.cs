@@ -17,7 +17,7 @@ namespace OpenTween.Tweens
                 .SetStart(1)
                 .SetEnd(2)
                 .SetDuration(0.1f)
-                .OnValueUpdated(f => value = f)
+                .SetOnValueUpdated(f => value = f)
                 .SetLoops(9, LoopType.Incremental)
                 .SetDisposeOnComplete(false);
 
@@ -36,7 +36,7 @@ namespace OpenTween.Tweens
                 .SetStart(1)
                 .SetEnd(2)
                 .SetDuration(0.1f)
-                .OnValueUpdated(f => value = f)
+                .SetOnValueUpdated(f => value = f)
                 .SetLoops(2)
                 .SetDisposeOnComplete(false);
 
@@ -55,7 +55,7 @@ namespace OpenTween.Tweens
                 .SetStart(1)
                 .SetEnd(2)
                 .SetDuration(0.1f)
-                .OnValueUpdated(f => value = f)
+                .SetOnValueUpdated(f => value = f)
                 .SetLoops(2, LoopType.YoYo)
                 .SetDisposeOnComplete(false);
             
@@ -76,7 +76,7 @@ namespace OpenTween.Tweens
                 .SetStart(1)
                 .SetEnd(2)
                 .SetDuration(0.1f)
-                .OnValueUpdated(f => value = f)
+                .SetOnValueUpdated(f => value = f)
                 .SetLoops(3, LoopType.YoYo)
                 .SetDisposeOnComplete(false);
             

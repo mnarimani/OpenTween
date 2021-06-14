@@ -4,39 +4,39 @@ namespace OpenTween
 {
     public partial struct Tween<T>
     {
-        ITweenBase ITweenBase.OnPlayStarted(Action callback)
+        ITweenBase ITweenBase.SetOnPlayStarted(Action callback)
         {
-            return OnPlayStarted(callback);
+            return SetOnPlayStarted(callback);
         }
 
-        ITweenBase ITweenBase.OnPaused(Action callback)
+        ITweenBase ITweenBase.SetOnPaused(Action callback)
         {
-            return OnPaused(callback);
+            return SetOnPaused(callback);
         }
 
-        ITweenBase ITweenBase.OnCompleted(Action callback)
+        ITweenBase ITweenBase.SetOnCompleted(Action callback)
         {
-            return OnCompleted(callback);
+            return SetOnCompleted(callback);
         }
 
-        ITweenBase ITweenBase.OnRewindStarted(Action callback)
+        ITweenBase ITweenBase.SetOnRewindStarted(Action callback)
         {
-            return OnRewindStarted(callback);
+            return SetOnRewindStarted(callback);
         }
 
-        ITweenBase ITweenBase.OnRewindPaused(Action callback)
+        ITweenBase ITweenBase.SetOnRewindPaused(Action callback)
         {
-            return OnRewindPaused(callback);
+            return SetOnRewindPaused(callback);
         }
 
-        ITweenBase ITweenBase.OnRewindCompleted(Action callback)
+        ITweenBase ITweenBase.SetOnRewindCompleted(Action callback)
         {
-            return OnRewindCompleted(callback);
+            return SetOnRewindCompleted(callback);
         }
 
-        ITweenBase ITweenBase.OnDisposing(Action callback)
+        ITweenBase ITweenBase.SetOnDisposing(Action callback)
         {
-            return OnDisposing(callback);
+            return SetOnDisposing(callback);
         }
 
         ITweenBase ITweenBase.Play(bool restart)

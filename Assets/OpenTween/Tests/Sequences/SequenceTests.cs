@@ -77,13 +77,13 @@ namespace OpenTween.Sequences
                 .SetStart(1)
                 .SetEnd(2)
                 .SetDuration(1)
-                .OnValueUpdated(f => tween1 = f)
+                .SetOnValueUpdated(f => tween1 = f)
             );
             sequence.Append(Tween.Create<float>()
                 .SetStart(3)
                 .SetEnd(4)
                 .SetDuration(1)
-                .OnValueUpdated(f => tween2 = f)
+                .SetOnValueUpdated(f => tween2 = f)
             );
 
             yield return new WaitForSeconds(0.9f);
@@ -108,14 +108,14 @@ namespace OpenTween.Sequences
                 .SetStart(1)
                 .SetEnd(2)
                 .SetDuration(1)
-                .OnValueUpdated(f => tween1 = f)
+                .SetOnValueUpdated(f => tween1 = f)
             );
             sequence.Append(1);
             sequence.Append(Tween.Create<float>()
                 .SetStart(3)
                 .SetEnd(4)
                 .SetDuration(1)
-                .OnValueUpdated(f => tween2 = f)
+                .SetOnValueUpdated(f => tween2 = f)
             );
             sequence.Append(1);
 

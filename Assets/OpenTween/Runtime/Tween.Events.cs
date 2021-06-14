@@ -14,49 +14,49 @@ namespace OpenTween
         public event Action Disposing { add => Refs.Disposing.Add(value); remove => Refs.Disposing.Remove(value); }
         public event Action<T> ValueUpdated { add => Refs.ValueUpdated.Add(value); remove => Refs.ValueUpdated.Remove(value); } 
         
-        public Tween<T> OnPlayStarted(Action callback)
+        public Tween<T> SetOnPlayStarted(Action callback)
         {
             Refs.PlayStarted.Add(callback);
             return this;
         }
 
-        public Tween<T> OnPaused(Action callback)
+        public Tween<T> SetOnPaused(Action callback)
         {
             Refs.Paused.Add(callback);
             return this;
         }
 
-        public Tween<T> OnCompleted(Action callback)
+        public Tween<T> SetOnCompleted(Action callback)
         {
             Refs.Completed.Add(callback);
             return this;
         }
 
-        public Tween<T> OnRewindStarted(Action callback)
+        public Tween<T> SetOnRewindStarted(Action callback)
         {
             Refs.RewindStarted.Add(callback);
             return this;
         }
 
-        public Tween<T> OnRewindPaused(Action callback)
+        public Tween<T> SetOnRewindPaused(Action callback)
         {
             Refs.RewindPaused.Add(callback);
             return this;
         }
 
-        public Tween<T> OnRewindCompleted(Action callback)
+        public Tween<T> SetOnRewindCompleted(Action callback)
         {
             Refs.RewindCompleted.Add(callback);
             return this;
         }
 
-        public Tween<T> OnDisposing(Action callback)
+        public Tween<T> SetOnDisposing(Action callback)
         {
             Refs.Disposing.Add(callback);
             return this;
         }
 
-        public Tween<T> OnValueUpdated(Action<T> callback)
+        public Tween<T> SetOnValueUpdated(Action<T> callback)
         {
             Refs.ValueUpdated.Add(callback);
             return this;

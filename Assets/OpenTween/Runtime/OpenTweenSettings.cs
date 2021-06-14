@@ -13,7 +13,7 @@ namespace OpenTween
     {
         public const int InnerLoopBatchCount = 32;
         private const string settingFileName = "OpenTweenSettings.asset";
-        [SerializeField] private int _initialCapacity = 500;
+        [SerializeField] private int _initialCapacity = 64000;
         [SerializeField] private bool _captureCreationStacktrace;
         [SerializeField] private float _defaultOvershootOrAmplitude = 1.70158f;
         [SerializeField] private float _defaultPeriod;
@@ -26,7 +26,7 @@ namespace OpenTween
 #endif
         private static void Load()
         {
-            var file = Resources.Load<OpenTweenSettingsFile>(settingFileName);
+            /*var file = Resources.Load<OpenTweenSettingsFile>(settingFileName);
             if (file != null)
             {
                 _instance = file.Settings;
@@ -41,7 +41,8 @@ namespace OpenTween
             AssetDatabase.SaveAssets();
 #endif
 
-            _instance = file.Settings;
+            _instance = file.Settings;*/
+            _instance = new OpenTweenSettings();
         }
 
         public static int InitialCapacity { get => _instance._initialCapacity; set => _instance._initialCapacity = value; }

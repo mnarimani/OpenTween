@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: Benchmark Setting
   m_EditorClassIdentifier: 
   tweenDuration: 10
-  cellWidth: 100
+  cellWidth: 300
+  useVisual: 0

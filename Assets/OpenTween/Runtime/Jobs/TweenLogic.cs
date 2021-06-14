@@ -28,18 +28,7 @@ namespace OpenTween.Jobs
         [BurstCompile]
         public static bool UpdateTweenTime<T>(ref TweenInternal<T> t, ref TweenOptions<T> options, float dt)
         {
-            return UpdateTimeBase(ref t, options.Duration + options.PrePlayDelay + options.PostPlayDelay, dt);
-        }
-
-        [BurstCompile]
-        public static bool UpdateSequenceTime(ref SequenceInternal t, ref SequenceOptions options, float dt)
-        {
-            return UpdateTimeBase(ref t, options.Duration, dt);
-        }
-
-        [BurstCompile]
-        private static bool UpdateTimeBase<TTween>(ref TTween t, float duration, float dt) where TTween : ITweenBaseInternal
-        {
+            float duration = options.Duration + options.PrePlayDelay + options.PostPlayDelay;
             if (Hint.Likely(t.State == TweenState.Running))
             {
                 t.CurrentTime += dt;
@@ -48,6 +37,41 @@ namespace OpenTween.Jobs
                 {
                     t.CurrentLoopCount++;
                     t.CurrentTime = duration;
+                    t.State = TweenState.Completed;
+                    t.IsCompletedInLastFrame = true;
+                }
+
+                return true;
+            }
+
+            if (t.State == TweenState.RewindRunning)
+            {
+                t.CurrentTime -= dt;
+
+                if (t.CurrentTime <= 0)
+                {
+                    t.CurrentLoopCount++;
+                    t.State = TweenState.RewindCompleted;
+                    t.CurrentTime = 0;
+                    t.IsRewindCompletedInLastFrame = true;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool UpdateSequenceTime(ref SequenceInternal t, ref SequenceOptions options, float dt)
+        {
+            if (Hint.Likely(t.State == TweenState.Running))
+            {
+                t.CurrentTime += dt;
+
+                if (t.CurrentTime >= options.Duration)
+                {
+                    t.CurrentLoopCount++;
+                    t.CurrentTime = options.Duration;
                     t.State = TweenState.Completed;
                     t.IsCompletedInLastFrame = true;
                 }

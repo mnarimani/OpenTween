@@ -23,7 +23,7 @@ namespace OpenTween.Tweens
                 .SetEnd(end)
                 .SetDuration(dur)
                 .SetPrePlayDelay(preDelay)
-                .OnValueUpdated(f => { value = f; });
+                .SetOnValueUpdated(f => { value = f; });
 
             yield return new WaitForSeconds(preDelay / 2);
 
@@ -53,7 +53,7 @@ namespace OpenTween.Tweens
                 .SetEnd(end)
                 .SetDuration(dur)
                 .SetPostPlayDelay(post)
-                .OnValueUpdated(f => { value = f; });
+                .SetOnValueUpdated(f => { value = f; });
 
             yield return new WaitForSeconds(post / 2);
 

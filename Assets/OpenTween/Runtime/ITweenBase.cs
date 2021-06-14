@@ -5,13 +5,13 @@ namespace OpenTween
 {
     public interface ITweenBase
     {
-        ITweenBase OnPlayStarted(Action callback);
-        ITweenBase OnPaused(Action callback);
-        ITweenBase OnCompleted(Action callback);
-        ITweenBase OnRewindStarted(Action callback);
-        ITweenBase OnRewindPaused(Action callback);
-        ITweenBase OnRewindCompleted(Action callback);
-        ITweenBase OnDisposing(Action callback);
+        ITweenBase SetOnPlayStarted(Action callback);
+        ITweenBase SetOnPaused(Action callback);
+        ITweenBase SetOnCompleted(Action callback);
+        ITweenBase SetOnRewindStarted(Action callback);
+        ITweenBase SetOnRewindPaused(Action callback);
+        ITweenBase SetOnRewindCompleted(Action callback);
+        ITweenBase SetOnDisposing(Action callback);
         ITweenBase Play(bool restart = false);
         ITweenBase Rewind(bool restart = false);
         ITweenBase ForceComplete();

@@ -20,7 +20,7 @@ namespace OpenTween.Tweens
             var tracker = new CallbackTracker(2);
             Tween<float> tween = CreateTween(0.2f).SetDisposeOnComplete(false);
             
-            tween.OnCompleted(tracker[0]);
+            tween.SetOnCompleted(tracker[0]);
             tween.Completed += tracker[1];
             
             yield return new WaitForSeconds(0.21f);
@@ -42,7 +42,7 @@ namespace OpenTween.Tweens
             var tracker = new CallbackTracker(2);
             Tween<float> tween = CreateTween(0.2f);
             
-            tween.OnDisposing(tracker[0]);
+            tween.SetOnDisposing(tracker[0]);
             tween.Disposing += tracker[1];
             
             yield return new WaitForSeconds(0.21f);
@@ -57,7 +57,7 @@ namespace OpenTween.Tweens
             var tracker = new CallbackTracker(2);
             Tween<float> tween = CreateTween(1000).BindToComponent(comp);
             
-            tween.OnDisposing(tracker[0]);
+            tween.SetOnDisposing(tracker[0]);
             tween.Disposing += tracker[1];
             
             yield return new WaitForSeconds(0.1f);
@@ -75,7 +75,7 @@ namespace OpenTween.Tweens
             var tracker = new CallbackTracker(2);
             Tween<float> tween = CreateTween(1000);
             
-            tween.OnDisposing(tracker[0]);
+            tween.SetOnDisposing(tracker[0]);
             tween.Disposing += tracker[1];
             
             yield return new WaitForSeconds(0.1f);
